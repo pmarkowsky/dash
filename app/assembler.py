@@ -30,12 +30,66 @@ class Assembler(object):
       A new Assembler instance
     """
     # we default to x86 in 32-bit mode
-    self.asm_arch = keystone.KS_ARCH_X86
-    self.asm_mode = keystone.KS_MODE_32
-    self.disasm_arch = capstone.CS_ARCH_X86
-    self.disasm_mode = capstone.CS_MODE_32
+    self.SetArchAndMode("X86", "32", "Little")
+    
+  def SetArchAndMode(self, arch, mode, endianess):
+    """
+    Set the architechture and mode to assemble and disassemble in
+    """
+    arches_and_modes = {("X86", "16", "Little"): ((keystone.KS_ARCH_X86, 
+                                                   keystone.KS_MODE_16|keystone.KS_MODE_LITTLE_ENDIAN),
+                                                  (capstone.CS_ARCH_X86,
+                                                   capstone.CS_MODE_16|capstone.CS_MODE_LITTLE_ENDIAN)),
+                        ("X86", "32", "Little"): ((keystone.KS_ARCH_X86, 
+                                                  keystone.KS_MODE_32|keystone.KS_MODE_LITTLE_ENDIAN),
+                                                  (capstone.CS_ARCH_X86,
+                                                   capstone.CS_MODE_32|capstone.CS_MODE_LITTLE_ENDIAN)),
+                        ("X86", "64", "Little"): ((keystone.KS_ARCH_X86, 
+                                                  keystone.KS_MODE_64|keystone.KS_MODE_LITTLE_ENDIAN),
+                                                  (capstone.CS_ARCH_X86,
+                                                   capstone.CS_MODE_64|capstone.CS_MODE_LITTLE_ENDIAN)),
+                        ("ARM", "16", "Big"): ((keystone.KS_ARCH_ARM, 
+                                                keystone.KS_MODE_THUMB|keystone.KS_MODE_BIG_ENDIAN),
+                                                (capstone.CS_ARCH_ARM,
+                                                capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
+                        ("ARM", "16", "Little"): ((keystone.KS_ARCH_ARM, 
+                                                keystone.KS_MODE_THUMB|keystone.KS_MODE_LITTLE_ENDIAN),
+                                                (capstone.CS_ARCH_ARM,
+                                                capstone.CS_MODE_THUMB|capstone.CS_MODE_LITTLE_ENDIAN)),
+                        ("ARM", "32", "Big"): ((keystone.KS_ARCH_ARM, 
+                                                keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
+                                                (capstone.CS_ARCH_ARM,
+                                                capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
+                        ("ARM", "32", "Little"): ((keystone.KS_ARCH_ARM, 
+                                                keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
+                                                (capstone.CS_ARCH_ARM,
+                                                capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
+                        ("ARM64", "64", "Little"): ((keystone.KS_ARCH_ARM64, 
+                                                keystone.KS_MODE_64|keystone.KS_MODE_LITTLE_ENDIAN),
+                                                (capstone.CS_ARCH_ARM64,
+                                                capstone.CS_MODE_64|capstone.CS_MODE_LITTLE_ENDIAN)),
+                        ("MIPS", "32", "Big"): ((keystone.KS_ARCH_MIPS, 
+                                                keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
+                                                (capstone.CS_ARCH_ARM,
+                                                capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
+                        ("MIPS", "32", "Little"): ((keystone.KS_ARCH_MIPS, 
+                                                keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
+                                                (capstone.CS_ARCH_ARM,
+                                                capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN))
+                        }
+    new_settings = arches_and_modes.get((arch, mode, endianess), None)
+                                                              
+    if not new_settings:
+      # leave the settings as is
+      return
+    
+    self.asm_arch = new_settings[0][0]
+    self.asm_mode = new_settings[0][1]
+    self.disasm_arch = new_settings[1][0]
+    self.disasm_mode = new_settings[1][1]
     self.assembler = keystone.Ks(self.asm_arch, self.asm_mode)
     self.disassembler = capstone.Cs(self.disasm_arch, self.disasm_mode)
+    
 
   def IsADataDefinitionInstruction(self, mnemonic):
     """
@@ -78,11 +132,13 @@ class Assembler(object):
         next_addr = row.address
         
       try:
-        encoded_bytes, count  = self.assembler.asm(row.mnemonic, addr=next_addr)
+        encoded_bytes, inst_count  = self.assembler.asm(row.mnemonic,
+                                                        addr=next_addr)
         row.opcode = binascii.unhexlify("".join(["%02x" % byte for byte in encoded_bytes]))
         next_addr += len(encoded_bytes)
         store.UpdateRow(row.index, row)
-      except:
+      except Exception as exc:
+        print str(exc)
         store.SetErrorAtIndex(row.index)
         break
     return

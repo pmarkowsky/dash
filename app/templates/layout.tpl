@@ -115,7 +115,7 @@
     </div>
   </div><!-- row -->
  <footer>
-        <p>&copy; Dash 2015</p>
+        <p>&copy; Dash 2016</p>
  </footer>
 
 </div><!-- container -->

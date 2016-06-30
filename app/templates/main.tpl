@@ -20,7 +20,6 @@ var submit_data_to_url = function (url, field) {
       var asm_row_id = $(this).attr("row-id");
       var row_url = url + asm_row_id;
       var text = $(this).val();
-      debugger;
       
       if (event.which  == 13) { //13 is the enter key
         $(this).off();
@@ -103,7 +102,7 @@ function update_current_row_id(event) {
 }
 
   
-var address_func  = submit_function_cb(submit_addr);
+var addr_func  = submit_function_cb(submit_addr);
 var comment_func = submit_function_cb(submit_comment); 
 var label_func = submit_function_cb(submit_label);
 var opcode_func = submit_function_cb(submit_opcode);
@@ -139,7 +138,6 @@ function set_bits(event) {
 }
 
 function build_asm_table_rows(table_rows) {
-  debugger;
   var table_body = $("#main-asm-table > tbody");
   table_body.html("");
   
@@ -170,6 +168,8 @@ function update_asm_rows() {
   $.getJSON("/api/table_row", function(data) {
      current_table_rows = data.rows;
      build_asm_table_rows(current_table_rows);
+     $(".asm-addr").off();
+     $(".asm-addr").on("click", addr_func);
      $(".asm-comment").off();
      $(".asm-comment").on("click", comment_func); 
      $(".asm-opcode").off();

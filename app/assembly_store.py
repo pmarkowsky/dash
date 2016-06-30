@@ -38,6 +38,9 @@ class RowData(object):
     self.stack_delta = stack_delta
 
   def ToDict(self):
+    """
+    Return a row as a dict for conversion to JSON
+    """
     return {'offset': self.offset, 
             'label': self.label, 
             'address': self.DisplayAddress(),
@@ -88,6 +91,12 @@ class RowData(object):
       self.opcode = hex_str
       self.mnemonic = '<INVALID OPCODE SUPPLIED>'
       self.error = True
+      
+  def DisplayMnemonic(self):
+    """
+    Format the Mnemonic for display
+    """
+    pass
 
   def SetMnemonic(self, mnemonic):
     """
@@ -119,12 +128,10 @@ class RowData(object):
     else:
       self.is_a_data_defintion_inst = False
     # fix capitalization
-    if not self.is_a_data_defintion_inst:
-      self.mnemonic = self.mnemonic.upper()
-    else:
-      new_mnemonic = self.mnemonic.split()
-      self.mnemonic = ''
-      self.mnemonic += new_mnemonic[0].upper() + ' ' + ''.join(new_mnemonic[1:])
+    # TODO better formatting
+    new_mnemonic = self.mnemonic.split()
+    self.mnemonic = ''
+    self.mnemonic += new_mnemonic[0].upper() + ' ' + ''.join(new_mnemonic[1:])
     self.in_use = True
 
   def DisplayOpcode(self):
@@ -145,7 +152,7 @@ class RowData(object):
       if i % 2 == 1:
         hex_str += ' '
 
-    return hex_str.strip()
+    return hex_str.upper().strip()
 
 
 class AssemblyStoreError(Exception):
@@ -289,7 +296,6 @@ class AssemblyStore(object):
     """
     self.rows[i] = new_row
     if new_row.label != '' and new_row.label not in self.labels:
-      import pdb; pdb.set_trace()
       self.labels.add(new_row.label)
     # update offsets and addresses
     self.UpdateOffsetsAndAddresses()
@@ -328,13 +334,16 @@ class AssemblyStore(object):
         continue
 
       if not next_address:
+        print "length of row %d opcode: %d" % (i, len(self.rows[i].opcode))
         next_address = self.rows[i].address + len(self.rows[i].opcode)
+        print "next_address: %d" % next_address
         next_offset = self.rows[i].offset + len(self.rows[i].opcode)
         continue
       
-      next_address += len(self.rows[i].opcode)
+      
       self.rows[i].address = next_address
       self.rows[i].offset = next_offset
+      next_address += len(self.rows[i].opcode)
       next_offset += len(self.rows[i].opcode)
 
   def ClearErrors(self):
