@@ -68,6 +68,9 @@ class RowData(object):
       pass
 
   def SetAddress(self, address):
+    """
+    Set the address from a string.
+    """
     try:
       if address.startswith('0x'):
         self.address = int(address, 16) 

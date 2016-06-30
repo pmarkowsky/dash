@@ -89,14 +89,13 @@ class TableRow(Resource):
         parser.add_argument('offset', type=int, default=row.offset, 
                             location='json')
         parser.add_argument('label', default=row.label, location='json')
-        parser.add_argument('address', type=int, default=row.address,
+        parser.add_argument('address', type=str, default=row.address,
                             location='json')
         parser.add_argument('opcode', default=row.opcode, location='json')
         parser.add_argument('mnemonic', default=row.mnemonic, location='json')
         parser.add_argument('comment', default=row.comment, location='json')
         #this defaults to true as adding any data makes a row in use
         parser.add_argument('in_use', default=True, location='json')
-        
         args = parser.parse_args()
         row.offset = args.offset
         row.SetLabel(args.label)

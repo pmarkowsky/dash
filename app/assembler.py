@@ -123,19 +123,21 @@ class Assembler(object):
       Updates the assembly store at the given path (row index) 
     """
     store.ClearErrors();
-    next_addr = None
+    cur_addr = None
     for row in store.GetRowsIterator():
       if not row.in_use:
         continue
       # check if this row contains a label and adjust the mnemonic (TODO)
-      if not next_addr:
-        next_addr = row.address
+      if not cur_addr:
+        cur_addr = row.address
         
       try:
         encoded_bytes, inst_count  = self.assembler.asm(row.mnemonic,
-                                                        addr=next_addr)
-        row.opcode = binascii.unhexlify("".join(["%02x" % byte for byte in encoded_bytes]))
-        next_addr += len(encoded_bytes)
+                                                        addr=cur_addr)
+        opcode_str = "".join(["%02x" % byte for byte in encoded_bytes])
+        row.opcode = binascii.unhexlify(opcode_str)
+        row.address = cur_addr
+        cur_addr += len(encoded_bytes)
         store.UpdateRow(row.index, row)
       except Exception as exc:
         print str(exc)
