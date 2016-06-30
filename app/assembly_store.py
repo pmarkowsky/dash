@@ -108,6 +108,7 @@ class RowData(object):
 
     # this is a hack find a better way to do this
     normalized_mnemonic = mnemonic.lower().strip()
+    # FIXME -- this is hard coded for x86/x64 specific
     if normalized_mnemonic.startswith('j') or normalized_mnemonic.startswith('call'):
       self.is_branch_or_call = True
     else:
@@ -257,7 +258,7 @@ class AssemblyStore(object):
 
   def AddTenRows(self):
     """
-    Append 10 empty rows
+    Append 10 empty rows to the store.
     """
     starting_index = len(self.rows)
     for i in xrange(10):
@@ -288,7 +289,7 @@ class AssemblyStore(object):
 
     Args:
       row: a RowData instance
-      inst: a Distorm3 instruction instance
+      inst: a Capstone.CsInsn instance
 
     Returns:
       a string for the new mnemonic of the instruction
@@ -327,28 +328,41 @@ class AssemblyStore(object):
 
 
   def UpdateOffsetsAndAddresses(self):
-    self.rows[0].offset = 0
-    next_address = self.rows[0].address + len(self.rows[0].opcode)
-    next_offset = len(self.rows[0].opcode)
+    """
+    Update all of the offsets and addresses after altering row data.
+    """
+    return
+#    self.rows[0].offset = 0
+#    next_address = self.rows[0].address + len(self.rows[0].opcode)
+#    next_offset = len(self.rows[0].opcode)
 
     # update offsets and addresses
-    for i in xrange(1, len(self.rows)):
-      if not self.rows[i].in_use:
-        continue
+#    for i in xrange(1, len(self.rows)):
+#      if not self.rows[i].in_use:
+#        continue
 
-      self.rows[i].address = next_address
-      next_address += len(self.rows[i].opcode)
-      self.rows[i].offset = next_offset
-      next_offset += len(self.rows[i].opcode)
+#      self.rows[i].address = next_address
+#      next_address += len(self.rows[i].opcode)
+#      self.rows[i].offset = next_offset
+#      next_offset += len(self.rows[i].opcode)
 
   def ClearErrors(self):
+    """
+    Clear all errors from rows.
+    """
     for i in xrange(len(self.rows)):
       self.rows[i].error = False
 
   def SetErrorAtIndex(self, index):
+    """
+    Mark a row as being in error.
+    """
     self.rows[index].error = True
 
   def GetRow(self, i):
+    """
+    Get a deep copy of a row in the store for a given index.
+    """
     return self.DeepCopyRow(i)
 
   def GetRows(self):

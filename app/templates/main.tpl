@@ -106,7 +106,6 @@ var address_func  = submit_function_cb(submit_addr);
 var comment_func = submit_function_cb(submit_comment); 
 var label_func = submit_function_cb(submit_label);
 var opcode_func = submit_function_cb(submit_opcode);
-//var mnem_func = submit_function_cb(submit_mnemonic);
 var mnem_func = submit_function_cb_with_auto_complete(submit_mnemonic);
 
 var hotkeys_func = function (event) {

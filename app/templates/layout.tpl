@@ -62,7 +62,7 @@
 
 <div class="container" id="main_container"> 
   <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12">
     {% block body %}{% endblock %}
     </div>
   </div>

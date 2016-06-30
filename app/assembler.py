@@ -21,7 +21,7 @@ class AssemblerError(Exception):
 
 
 class Assembler(object):
-  """Class to encapsilate assembling and disassembling logic."""
+  """Class to encapsilate all assembling and disassembling logic."""
   def __init__(self):
     """
     Constructor.
@@ -30,10 +30,12 @@ class Assembler(object):
       A new Assembler instance
     """
     # we default to x86 in 32-bit mode
-    self.arch = keystone.KS_ARCH_X86
-    self.mode = keystone.KS_MODE_32
-    self.assembler = keystone.Ks(self.arch, self.mode)
-    self.disassembler = capstone.Cs(self.arch, self.mode)
+    self.asm_arch = keystone.KS_ARCH_X86
+    self.asm_mode = keystone.KS_MODE_32
+    self.disasm_arch = capstone.CS_ARCH_X86
+    self.disasm_mode = capstone.CS_MODE_32
+    self.assembler = keystone.Ks(self.asm_arch, self.asm_mode)
+    self.disassembler = capstone.Cs(self.disasm_arch, self.disasm_mode)
 
   def UpdateStoreOpcodes(self, opcode_str, store):
     """
@@ -128,21 +130,32 @@ class Assembler(object):
       Updates the assembly store at the given path (row index) 
     """
     store.ClearErrors();
-    opcodes = self.AssembleFile(self.CreateNasmFileText(store))
-    
-    if not opcodes or len(opcodes) < 1:
-      store.SetErrorAtIndex(index)
-      return
-    
-    self.UpdateStoreOpcodes(opcodes, store)
+    next_addr = None
+    for row in store.GetRowsIterator():
+      if not row.in_use:
+        continue
+      # check if this row contains a label and adjust the mnemonic (TODO)
+      if not next_addr:
+        next_addr = row.address
+        
+      try:
+        encoded_bytes, count  = self.assembler.asm(row.mnemonic, addr=next_addr)
+        row.opcode = binascii.unhexlify("".join(["%02x" % byte for byte in encoded_bytes]))
+        next_addr += len(encoded_bytes)
+        store.UpdateRow(row.index, row)
+      except:
+        store.SetErrorAtIndex(row.index)
+        break
+    return
 
 
   def Disassemble(self, index, store):
     """
-    Disassembles the instruction given the opcode string.
+    Disassembles the instruction given the opcode string taken from a row at
+    the index provided.
     
     Args:
-      index: an integer describing the row index in the AssemblyStore
+      index: an integer row index in the AssemblyStore
       store: The AssemblyStore instance
       
     Returns:
@@ -152,237 +165,15 @@ class Assembler(object):
       Updates the AssemblyStore row specified by the index.
     """
     row = store.GetRow(index)
-    # try to turn the hex encoded string into binary 
-    
-    # determine the bit width constant    
-    if store.bits == 32:
-      bitw = distorm3.Decode32Bits
-    elif store.bits == 64:
-      bitw = distorm3.Decode64Bits
-    else:
-      bitw = distorm3.Decode16Bits
-      
     # disassemble and set in the store
     instructions = list(self.disassembler.disasm(row.opcode, row.address))
     
     if instructions:
-      row.opcode = instructions[0].instructionBytes
-      row.SetMnemonic(str(instructions[0]))
+      row.opcode = str(instructions[0].bytes)
+      row.SetMnemonic("%s %s" % (instructions[0].mnemonic, instructions[0].op_str))
       
       store.UpdateRow(row.index, row)
       
       if len(instructions) > 1:
         for i in xrange(1, len(instructions)):
           store.CreateRowFromCapstoneInst(row.index + i, instructions[i])
-    
-  
-  def Reassemble(self, store):
-    """
-    Re-assembles all of the instructions in the store.
-    """
-    pass
-    
-
-  def SplitInst(self, asm_line):
-    """
-    Split an instruction into a dictionary of instruction, dst_op, 
-    src_op, and optional_op.
-    
-    This is very naive.
-    
-    Args:
-     asm_line: a string of assembly 
-     
-    Returns:
-     a tuple with a  dictionary
-    """ 
-    inst = {'mnemonic:': '', 'dst_op': '', 'src_op': '', 'opt_op': ''}
-    asm_fields = asm_line.split()
-    inst['mnemonic'] = asm_fields[0]
-    if inst['mnemonic'].lower() in ['db', 'dw', 'dd', 'dq']:
-      return inst
-    elif inst['mnemonic'].lower() in 'push':
-      inst['src_op'] = asm_fields[-1]
-      inst['dst_op'] = 'RSP'
-      return inst
-    elif inst['mnemonic'].lower() == 'pop':
-      inst['src_op'] = 'RSP' 
-      inst['dst_op'] = asm_fields[-1]
-      return inst
-    operands = asm_line.split(',')
-    if len(operands) == 1:
-      return inst
-    elif len(operands) == 2:
-      inst['dst_op'], inst['src_op'] = operands[0].strip(), operands[1].strip()
-      # remove any prefixes and instructions
-      inst['dst_op'] = inst['dst_op'].split()[-1].strip()
-      return inst
-    elif len(operands) == 3:
-      inst['dst_op'], inst['src_op'] = operands[0].strip(), operands[1].strip()
-      # remove any prefixes and instructions
-      inst['dst_op'] = inst['dst_op'].split()[-1].strip()
-      inst['opt_op'] = operands[-1].strip()
-      return inst
-    else:
-      # default
-      return inst
-    
-  #TODO refactor this into dash.py
-  def TranslateUnicode(self, gui, uni_string, bit_width):
-    """
-    Decode and disassemble unicode escape sequences (e.g. "\u4141") storing them 
-    in the gtk.ListStore
-    
-    Args:
-      gui: a gtk.Window instance
-      uni_string: a string containing unicode escape sequences
-      bit_width: an integer either with a value of 16,32, or 64
-    
-    Returns:
-      N / A
-    """
-    data = []
-    ascii_bytes = ''
-    binary = ''
-  
-    # Pull out all quoted strings and assume they're unicode escape sequences
-    start = uni_string.find('\"') # First quote
-    end = uni_string[start+1:].find('\"') + start + 1 # next quote 
-    while (start < len(uni_string) and end < len(uni_string)):
-      tmp_str = ""
-      for char_to_remove in ["\"", "+", "\n"]:
-        tmp_str += uni_string[start:end].replace(char_to_remove, '')
-      data += tmp_str.split('\u')
-  
-      start = uni_string[end+1:].find('\"') 
-      if start == -1:
-        break
-      start = start + end + 1# next after end quote
-      end = uni_string[start+1:].find('\"')
-      if end == -1:
-        break
-      end = end + start + 1  # next after start quote
-  
-    for word in data:
-      if len(word) != 4:
-        continue
-      ascii_bytes += word[2:]
-      ascii_bytes += word[:2]
-  
-    self.store.reset()
-    self.store.bitwidth = bit_width
-    gui.menu_set_bitwidth(bit_width)
-    path = self.store.get_path(store.get_iter_root())
-    self.Disassemble(self.store, path, ascii_bytes)
-
-  def ImportBinary(self, gui, binary, bit_width):
-    """Imports a binary of assembly."""
-    self.store.reset()
-    self.store.bit_width = bit_width
-    gui.menu_set_bit_width(bit_width)
-    path = store.get_path(store.get_iter_root())
-    opcodes = binascii.hexlify(binary)
-    self.Disassemble(path, opcodes)
-    
-  def ExtractNasmComment(self, asm_line):
-    """
-    Get the comment from a NASM line.
-    
-    Args:
-      asm_line:
-      
-    Returns:
-      jj
-    """
-    single_quote_count = 0
-    double_quote_count = 0
-    for i in xrange(len(asm_line)):
-      if asm_line[i] == '\'':
-        single_quote_count = (single_quote_count + 1) % 2
-      elif asm_line[i] == '"':
-        double_quote_count = (double_quote_count + 1) % 2
-      if asm_line[i] == ';':
-        # we're inside a comment
-        if single_quote_count or double_quote_count:
-          continue
-        # we've found the first comment ;
-        else:
-          break
-    if asm_line[i] != ';':
-      i += 1
-    return asm_line[:i], asm_line[i:]
-    
-    
-  def ImportAssembly(self, gui, listing):
-    """Imports a string listing of assembly."""
-    self.store.reset()
-    citer = self.store.get_iter_root()
-    lines = listing.splitlines()
-    
-    #pdb.set_trace() 
-    # TODO replace this with a grammar
-    cur_label = ''
-    cur_path = self.store.get_path(citer)
-    prev_path = None
-    for line in lines:
-      # skip blank lines
-      if line.strip() == '':
-        continue
-      # check for a label
-      if line.endswith(':'):
-        cur_label = line.replace(':','')
-        continue
-      # clean up line and extract
-      asm = line.strip()
-      # check for a comment
-      asm, comment = self.ExtractNasmComment(asm)
-      # add label to row
-      if cur_label:
-        self.store.set_label(cur_path, cur_label)
-        cur_label = ''
-
-      # add comment to row
-      self.store.set_comment(cur_path, comment) 
-       
-      # deal with
-      if asm.startswith('BITS'):
-        self.store.bitwidth = asm.split()[1]
-        gui.menu_set_bitwidth(self.store.bitwidth)
-        continue
-      else:
-        self.store.set_assembly(cur_path, asm)
-        self.store.insert_blank_row_after(cur_path)
-        #self.store.Assemble(path, asm)
-        prev_path = cur_path
-        citer = self.store.iter_next(citer)
-        cur_path = self.store.get_path(citer)
-    
-    self.Reassemble()
-    
-  def TranslatePyRB(self, gui, pyrb_string, bit_width):
-    """
-    Translate a python or ruby string to assembly and disassemble into the store.
-    
-    Args:
-      gui: a gtk.Widget instance
-      pyrb_string: a string
-      bit_width: an integer with a value of 16,32, or 64
-      
-    Returns:
-      jjj
-    """
-    buf = ''
-    lines = pyrb_string.split()
-    if len(lines) >= 1:
-      for line in lines:
-        # strip all extra contents
-        line = line[line.find('"'):line.rfind('"')]
-        line = line.replace('\\x', ' ').replace('"', '')
-        buf += line
-  
-    self.store.reset()
-    self.store.bitwidth = bit_width
-    gui.menu_set_bitwidth(bit_width)
-    path = self.store.get_path(self.store.get_iter_root())
-    self.Disassemble(path, buf)
-

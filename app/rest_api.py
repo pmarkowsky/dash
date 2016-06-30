@@ -55,7 +55,6 @@ class TableRowList(Resource):
 class TableRow(Resource):
     """
     Rest API responsible for updating and retrieving individual table rows.
-    
     """
     def insert_multiple_rows_by_mnemonic(self, current_row, mnemonics):
         """
@@ -99,7 +98,6 @@ class TableRow(Resource):
         parser.add_argument('in_use', default=True, location='json')
         
         args = parser.parse_args()
-        
         row.offset = args.offset
         row.SetLabel(args.label)
         row.SetAddress(args.address)
@@ -139,18 +137,6 @@ class TableRow(Resource):
         return row.ToDict()
     
     
-class RawAssembler(Resource):
-    """
-    Provide raw access to the assembler.
-    """
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('lines', type=str, required=True)
-        args = parser.parse_args()
-        ASSEMBLER.AssembleRawFile(data, ASSEMBLY_STORE)
-        return jsonify(success=True), 200
-    
-    
 class AssemblyStoreBitSetting(Resource):
     """
     REST calls for changing assembler bit settings.
@@ -168,21 +154,8 @@ class AssemblyStoreBitSetting(Resource):
                             location='json')
         args = parser.parse_args()
         ASSEMBLY_STORE.bits = args.bits
-        ASSEMBLER.Reassemble(ASSEMBLY_STORE)        
+        ASSEMBLER.Reassemble(ASSEMBLY_STORE) 
         return jsonify(success=True, bits=args.bits), 201
     
     def get(self):
         return jsonify(bits=ASSEMBLY_STORE.bits)
-    
-class AssemblyStoreStructures(Resource):
-    """
-    Assembly store predefined structs
-    """
-    def post(self):
-        """
-        Add nasm data structures.
-        """
-        pass
-    
-    def get(self):
-        pass
