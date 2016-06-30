@@ -1,0 +1,4 @@
+Flask == 0.10.1
+flask-restful
+capstone == 3.0.4
+keystone 

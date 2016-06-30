@@ -1,0 +1,92 @@
+a {
+  color: red;
+}
+
+a:hover
+{
+  color: grey;
+}
+
+.login-logo
+{
+  width:45%;
+}
+
+#main_container
+{
+  padding-top: 10px;
+  margin-top:  10px;
+}
+
+.navbar-logo-img
+{
+  padding-top: 10px;
+  max-width:   100px;
+}
+
+.signature-summary-panel-header
+{
+ color: white;
+ background-color: #A11616;
+}
+
+.navbar-grey
+{
+  position: relative;
+  z-index: 20;
+  -webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+  background: #dddde2;
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #dddde2), color-stop(1, #f9f9f9));
+  background: -ms-linear-gradient(bottom, #dddde2, #f9f9f9);
+  background: -moz-linear-gradient(center bottom, #dddde2 0%, #f9f9f9 100%);
+  background: -o-linear-gradient(bottom, #dddde2, #f9f9f9);
+  filter: progid:dximagetransform.microsoft.gradient(startColorStr='#dddde2', EndColorStr='#f9f9f9');
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#f9f9f9',EndColorStr='#dddde2')";
+  padding: .75em;
+  margin: 0px;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  border: 0px;
+  border-bottom: 1px solid #9898a7;
+}
+
+.scrollable-menu 
+{
+    height: auto;
+    max-height: 120px;
+    overflow-x: hidden;
+}
+
+.sigpreview
+{
+  max-width: 400px; 
+  max-height:69px;
+}
+
+.search-bar 
+{
+  max-width: 300px;
+}
+
+.command-button
+{
+  width: 200px;
+}
+
+.asm-mnemonic
+{
+   background-color: lightblue;
+   opacity: 0.8;
+   font-family:"Lucida Console", Monaco, monospace;
+}
+
+.asm-opcode
+{
+   background-color: lightgrey;
+}
