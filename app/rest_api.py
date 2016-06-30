@@ -88,7 +88,7 @@ class TableRow(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('offset', type=int, default=row.offset, 
                             location='json')
-        parser.add_argument('label', default=row.opcode, location='json')
+        parser.add_argument('label', default=row.label, location='json')
         parser.add_argument('address', type=int, default=row.address,
                             location='json')
         parser.add_argument('opcode', default=row.opcode, location='json')
@@ -137,11 +137,42 @@ class TableRow(Resource):
         return row.ToDict()
     
     
-class AssemblyStoreBitSetting(Resource):
+class AssemblyStoreModeSettings(Resource):
     """
     REST calls for changing assembler bit settings.
     """
     def valid_bits(self, value):
+        """
+        Ensure that the bits values are within our supported range of [16, 32, 64]
+        """
+
+        result = int(value)
+        if result not in (16, 32, 64):
+            raise ValueError("Invalid bits")
+        else:
+            return result
+        
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('bits', type=self.valid_bits, required=True,
+                            location='json')
+        args = parser.parse_args()
+        ASSEMBLY_STORE.bits = args.bits
+        ASSEMBLER.Reassemble(ASSEMBLY_STORE) 
+        return jsonify(success=True, bits=args.bits), 201
+    
+    def get(self):
+        return jsonify(bits=ASSEMBLY_STORE.bits)
+    
+    
+class AssemblyStoreArchSettings(Resource):
+    """
+    REST calls for changing assembler arch settings.
+    """
+    def valid_bits(self, value):
+        """
+        Ensure that the bits values are within our supported range of [16, 32, 64]
+        """
         result = int(value)
         if result not in (16, 32, 64):
             raise ValueError("Invalid bits")

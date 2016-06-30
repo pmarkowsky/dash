@@ -201,12 +201,9 @@ class AssemblyStore(object):
     row = self.rows[index]
     return cPickle.loads(cPickle.dumps(row, -1))
 
-  def ToggleDisplayLabels(self):
-    self.display_labels = not self.display_labels
-
   def SetBits(self, bits):
     """
-    Set the operating mode (BITS options in nasm), e.g. 16, 32, or 64
+    Set the operating mode  e.g. 16, 32, or 64
 
     Args:
       bits: an integer that's either 16,32, or 64
@@ -219,6 +216,9 @@ class AssemblyStore(object):
       return True
     else:
       return False
+    
+  def SetEndianess(self, little=True):
+    self.little_endian = little
 
   def Reset(self):
     """
@@ -283,35 +283,13 @@ class AssemblyStore(object):
 
     return False
 
-  def ReplaceLabel(self, row, inst):
-    """
-    Replace an assembler label.
-
-    Args:
-      row: a RowData instance
-      inst: a Capstone.CsInsn instance
-
-    Returns:
-      a string for the new mnemonic of the instruction
-    """
-    if row.mnemonic.split()[0].lower() != str(inst).split()[0].lower():
-      row.error = True
-      return ''
-
-    # check the number of [], +, -, *
-    for i in ('[', ']', '+', '-', ','):
-      if row.mnemonic.count(i) != str(inst).count(i):
-        row.error = True
-        return ''
-
-    return row.mnemonic.upper()
-
   def UpdateRow(self, i, new_row):
     """
     Update a row at a given offset
     """
     self.rows[i] = new_row
     if new_row.label != '' and new_row.label not in self.labels:
+      import pdb; pdb.set_trace()
       self.labels.add(new_row.label)
     # update offsets and addresses
     self.UpdateOffsetsAndAddresses()
@@ -330,21 +308,34 @@ class AssemblyStore(object):
   def UpdateOffsetsAndAddresses(self):
     """
     Update all of the offsets and addresses after altering row data.
+    
+    Args:
+      N / A
+      
+    Returns:
+      N / A
+      
+    Side Effects:
+      Updates the offsets and addresses of each row in the store.
     """
-    return
-#    self.rows[0].offset = 0
-#    next_address = self.rows[0].address + len(self.rows[0].opcode)
-#    next_offset = len(self.rows[0].opcode)
+    self.rows[0].offset = 0
+    next_address = None
+    next_offset = 0
 
     # update offsets and addresses
-#    for i in xrange(1, len(self.rows)):
-#      if not self.rows[i].in_use:
-#        continue
+    for i in xrange(0, len(self.rows)):
+      if not self.rows[i].in_use:
+        continue
 
-#      self.rows[i].address = next_address
-#      next_address += len(self.rows[i].opcode)
-#      self.rows[i].offset = next_offset
-#      next_offset += len(self.rows[i].opcode)
+      if not next_address:
+        next_address = self.rows[i].address + len(self.rows[i].opcode)
+        next_offset = self.rows[i].offset + len(self.rows[i].opcode)
+        continue
+      
+      next_address += len(self.rows[i].opcode)
+      self.rows[i].address = next_address
+      self.rows[i].offset = next_offset
+      next_offset += len(self.rows[i].opcode)
 
   def ClearErrors(self):
     """

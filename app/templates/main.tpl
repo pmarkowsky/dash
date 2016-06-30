@@ -20,6 +20,7 @@ var submit_data_to_url = function (url, field) {
       var asm_row_id = $(this).attr("row-id");
       var row_url = url + asm_row_id;
       var text = $(this).val();
+      debugger;
       
       if (event.which  == 13) { //13 is the enter key
         $(this).off();

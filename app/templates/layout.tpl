@@ -51,6 +51,16 @@
                     </ul>
                 </div>
               </button></li>
+              <li><button class="btn">
+                <div class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">ENDIANESS:<span id="bits-disp">Little</span><span class="caret"></span></a>
+                    <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
+                      <li class="asm-endian-option" role="presentation" id="set-little-endian">Little</li>
+                      <li class="asm-endian-option" role="presentation" id="set-big-endian">Big</li>
+                    </ul>
+                </div>
+              </button></li>
+
           </ul>
         </div><!--/.nav-collapse -->
 </nav> <!-- navbar -->
