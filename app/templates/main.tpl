@@ -147,7 +147,7 @@ function build_asm_table_rows(table_rows) {
     html_row.attr({id: i});
     html_row.addClass("asm-row");
     
-    if (row.error) {
+    if (row.error !== 0) {
       html_row.addClass("danger");
     }
     html_row.append('<td><input class="asm-row-check" id="rowid-' + row.index + 

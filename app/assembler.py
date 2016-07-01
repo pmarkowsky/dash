@@ -124,15 +124,34 @@ class Assembler(object):
     """
     store.ClearErrors();
     cur_addr = None
+    label_fixup_rows = {}
+    known_label_addresses = {}
+    
     for row in store.GetRowsIterator():
       if not row.in_use:
         continue
-      # check if this row contains a label and adjust the mnemonic (TODO)
+      
       if not cur_addr:
         cur_addr = row.address
+       
+      if row.label:
+        known_label_addresses[row.label] = cur_addr
         
       try:
-        encoded_bytes, inst_count  = self.assembler.asm(row.mnemonic,
+        # check if this row contains a label and adjust the mnemonic we're assembling
+        asm_label = store.ContainsLabel(row.mnemonic)
+        if asm_label:
+          if asm_label in known_label_addresses:
+            asm_label_addr_str = hex(known_label_addresses[asm_label]).replace('L', '')
+            mnemonic = row.mnemonic.replace(asm_label, asm_label_addr_str)
+          else:
+            # store the original mnemonic replacing the new one with
+            label_fixup_rows[row.index] = (row.mnemonic, asm_label)
+            mnemonic = row.mnemonic.replace(asm_label, hex(row.address + 1).replace('L', ''))
+        else:
+          mnemonic = row.mnemonic
+        
+        encoded_bytes, inst_count  = self.assembler.asm(mnemonic,
                                                         addr=cur_addr)
         opcode_str = "".join(["%02x" % byte for byte in encoded_bytes])
         row.opcode = binascii.unhexlify(opcode_str)
@@ -140,6 +159,34 @@ class Assembler(object):
         cur_addr += len(encoded_bytes)
         store.UpdateRow(row.index, row)
       except Exception as exc:
+        # TODO: replace this with logging
+        print str(exc)
+        store.SetErrorAtIndex(row.index)
+        break
+      
+    # this is a quick and dirty means of dealing with label fixups and should
+    # be arch dependent as we want to be able to support relaxation.
+    for row in store.GetRowsIterator():
+      if row.index not in label_fixup_rows:
+        continue
+      
+      mnemonic, label = label_fixup_rows[row.index]
+      label_addr_st = hex(known_label_addresses[label]).replace('L', '')
+      mnemonic = mnemonic.replace(label, label_addr_st)
+      
+      try:
+        encoded_bytes, inst_count  = self.assembler.asm(mnemonic,
+                                                        addr=row.address)
+        opcode_str = "".join(["%02x" % byte for byte in encoded_bytes])
+        row.opcode = binascii.unhexlify(opcode_str)
+        store.UpdateRow(row.index, row)
+        # scan to make sure we updated all of the symbols addresses
+        for row in store.GetRowsIterator():
+          if row.label != '':
+            known_label_addresses[row.label] = row.address
+        
+      except Exception as exc:
+        # TODO: replace this with logging
         print str(exc)
         store.SetErrorAtIndex(row.index)
         break
@@ -174,3 +221,6 @@ class Assembler(object):
       if len(instructions) > 1:
         for i in xrange(1, len(instructions)):
           store.CreateRowFromCapstoneInst(row.index + i, instructions[i])
+    else:
+      store.SetErrorAtIndex(index)
+

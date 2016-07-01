@@ -41,6 +41,10 @@ class RowData(object):
     """
     Return a row as a dict for conversion to JSON
     """
+    error_st = 0
+    if self.error:
+      error_st = 1
+      
     return {'offset': self.offset, 
             'label': self.label, 
             'address': self.DisplayAddress(),
@@ -48,7 +52,7 @@ class RowData(object):
             'mnemonic': self.mnemonic,
             'comment': self.comment,
             'index': self.index,
-            'error': self.error,
+            'error': error_st,
             'in_use': self.in_use,
             'targets': self.targets,
             'is_a_data_definition_inst': self.is_a_data_defintion_inst,
@@ -283,15 +287,12 @@ class AssemblyStore(object):
       row_asm: the string mnemonic of an instruction in a row.
 
     Returns:
-      True if the label is in the target
-
-      False otherwise.
+      The label if it is in the row_asm, None otherwise.
     """
     for label in self.labels:
       if label in row_asm:
-        return True
-
-    return False
+        return label
+    return None
 
   def UpdateRow(self, i, new_row):
     """
@@ -337,9 +338,7 @@ class AssemblyStore(object):
         continue
 
       if not next_address:
-        print "length of row %d opcode: %d" % (i, len(self.rows[i].opcode))
         next_address = self.rows[i].address + len(self.rows[i].opcode)
-        print "next_address: %d" % next_address
         next_offset = self.rows[i].offset + len(self.rows[i].opcode)
         continue
       
