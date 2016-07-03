@@ -106,6 +106,66 @@ class Assembler(object):
         return True
     return False
   
+  def RelaxInstructions(self, store, list_of_fixups, labels):
+    """
+    Relax assembly instructions as necessary.
+    
+    Args:
+      store: An AssemblyStore instance.
+      list_of_fixups: a dictionary of instructions and their indices that need to be
+                      adjusted.
+      labels: A dictionary of label names to addresses.
+    
+    Returns:
+      N / A
+    
+    Side Effects:
+      This will adjust the assembled instructions using wider versions
+      when a labels address is beyond the range of the short forms 
+      (e.g. jumps and calls on x86)
+    """
+    done_relaxing = False
+    
+    #last rounds label addresses
+    last_rounds_label_addresses = labels
+    import pdb; pdb.set_trace()
+    
+    while not done_relaxing:
+      for row in store.GetRowsIterator():
+        if row.index not in list_of_fixups:
+          continue
+        
+        mnemonic, label = list_of_fixups[row.index]
+        label_addr_st = hex(labels[label]).replace('L', '')
+        mnemonic = mnemonic.replace(label, label_addr_st)
+        
+        try:
+          encoded_bytes, inst_count  = self.assembler.asm(mnemonic,
+                                                          addr=row.address)
+          opcode_str = "".join(["%02x" % byte for byte in encoded_bytes])
+          row.opcode = binascii.unhexlify(opcode_str)
+          store.UpdateRow(row.index, row)
+          # scan to make sure we updated all of the symbols addresses
+          for row in store.GetRowsIterator():
+            if row.label != '':
+              labels[row.label] = row.address
+          
+        except Exception as exc:
+          # TODO: replace this with logging
+          print str(exc)
+          store.SetErrorAtIndex(row.index)
+          break
+        
+      # collect the labels update check if 
+      for row in store.GetRowsIterator():
+        if row.label != '':
+          labels[row.label.upper()] = row.address
+      # check to see if any labels differ at all if yes then continue relaxing
+      if labels == last_rounds_label_addresses:
+        done_relaxing = True
+      else:
+        last_rounds_label_addresses = labels
+  
   def Assemble(self, index, store):
     """Assemble the mnemonics provided in the store.
     
@@ -135,7 +195,7 @@ class Assembler(object):
         cur_addr = row.address
        
       if row.label:
-        known_label_addresses[row.label] = cur_addr
+        known_label_addresses[row.label.upper()] = cur_addr
         
       try:
         # check if this row contains a label and adjust the mnemonic we're assembling
@@ -166,30 +226,9 @@ class Assembler(object):
       
     # this is a quick and dirty means of dealing with label fixups and should
     # be arch dependent as we want to be able to support relaxation.
-    for row in store.GetRowsIterator():
-      if row.index not in label_fixup_rows:
-        continue
+    if label_fixup_rows and known_label_addresses:
+      self.RelaxInstructions(store, label_fixup_rows, known_label_addresses)
       
-      mnemonic, label = label_fixup_rows[row.index]
-      label_addr_st = hex(known_label_addresses[label]).replace('L', '')
-      mnemonic = mnemonic.replace(label, label_addr_st)
-      
-      try:
-        encoded_bytes, inst_count  = self.assembler.asm(mnemonic,
-                                                        addr=row.address)
-        opcode_str = "".join(["%02x" % byte for byte in encoded_bytes])
-        row.opcode = binascii.unhexlify(opcode_str)
-        store.UpdateRow(row.index, row)
-        # scan to make sure we updated all of the symbols addresses
-        for row in store.GetRowsIterator():
-          if row.label != '':
-            known_label_addresses[row.label] = row.address
-        
-      except Exception as exc:
-        # TODO: replace this with logging
-        print str(exc)
-        store.SetErrorAtIndex(row.index)
-        break
     return
 
 
