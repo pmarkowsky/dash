@@ -31,7 +31,7 @@
           <ul class="nav navbar-nav pull-right">
              <li><button class="btn">
                 <div class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">ARCH:<span id="bits-disp">x86</span><span class="caret"></span></a>
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">ARCH:<span id="arch-disp">x86</span><span class="caret"></span></a>
                     <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
                       <li class="asm-arch-option" role="presentation" id="set-arch-x86">x86</li>
                       <li class="asm-arch-option" role="presentation" id="set-bits-arm">ARM</li>
@@ -53,7 +53,7 @@
               </button></li>
               <li><button class="btn">
                 <div class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">ENDIANESS:<span id="bits-disp">Little</span><span class="caret"></span></a>
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">ENDIANESS:<span id="endian-disp">Little</span><span class="caret"></span></a>
                     <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
                       <li class="asm-endian-option" role="presentation" id="set-little-endian">Little</li>
                       <li class="asm-endian-option" role="presentation" id="set-big-endian">Big</li>
@@ -77,42 +77,6 @@
     </div>
   </div>
   <div class="row">
-    <!-- Modal -->
-    <div class="modal fade" id="data-structs-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title">Data Structures</h4>
-        </div>
-        <div class="modal-body">
-          <textarea id="notes_area" class="form-control" rows="8"></textarea>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" id="add-data-structs-btn" data-dismiss="modal" class="btn btn-success">Ok</button>
-        </div>
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-    </div>
-    
-    <div class="modal fade" id="raw-asm-modal" tabindex="-1" role="dialog" aria-labelledby="asmModal" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title">Enter ASM Code</h4>
-        </div>
-        <div class="modal-body">
-          <textarea id="asm_area" class="form-control" rows="20"></textarea>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" id="assemble-btn" data-dismiss="modal" class="btn btn-success">Assemble</button>
-        </div>
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-    </div>
   </div><!-- row -->
  <footer>
         <p>&copy; Dash 2016</p>

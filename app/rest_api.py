@@ -9,6 +9,9 @@ from flask.ext.restful import Resource, reqparse, marshal, marshal_with, fields
 
 #app specific modules
 from assembler import Assembler, AssemblerError
+from assembler import X86_16,X86_32,X86_64, ARM_16,ARM_32,ARM_64,MIPS_32, \
+     BIG_ENDIAN,LITTLE_ENDIAN
+
 from assembly_store import AssemblyStore, AssemblyStoreError, RowData
 
 ASSEMBLY_STORE = AssemblyStore()
@@ -137,56 +140,48 @@ class TableRow(Resource):
         return row.ToDict()
     
     
-class AssemblyStoreModeSettings(Resource):
-    """
-    REST calls for changing assembler bit settings.
-    """
-    def valid_bits(self, value):
-        """
-        Ensure that the bits values are within our supported range of [16, 32, 64]
-        """
-
-        result = int(value)
-        if result not in (16, 32, 64):
-            raise ValueError("Invalid bits")
-        else:
-            return result
-        
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('bits', type=self.valid_bits, required=True,
-                            location='json')
-        args = parser.parse_args()
-        ASSEMBLY_STORE.bits = args.bits
-        ASSEMBLER.Reassemble(ASSEMBLY_STORE) 
-        return jsonify(success=True, bits=args.bits), 201
-    
-    def get(self):
-        return jsonify(bits=ASSEMBLY_STORE.bits)
-    
-    
-class AssemblyStoreArchSettings(Resource):
+class AssemblyStoreSettings(Resource):
     """
     REST calls for changing assembler arch settings.
     """
-    def valid_bits(self, value):
+    def valid_archmode(self, value):
         """
-        Ensure that the bits values are within our supported range of [16, 32, 64]
+        Ensure that the arch and mode value are within the supported range
         """
         result = int(value)
-        if result not in (16, 32, 64):
-            raise ValueError("Invalid bits")
+        if result not in (X86_16, X86_32, X86_64, ARM_16, ARM_32, ARM_64, MIPS_32):
+            raise ValueError("Invalid arch_mode specified")
+        else:
+            return result
+        
+    def valid_endianess(self, value):
+        """
+        Ensure that the endian
+        """
+        result = int(value)
+        if result not in (BIG_ENDIAN, LITTLE_ENDIAN):
+            raise ValueError("Invalid endianess specified")
         else:
             return result
         
     def post(self):
+        """
+        Handle setting the architechture settings.
+        """
         parser = reqparse.RequestParser()
-        parser.add_argument('bits', type=self.valid_bits, required=True,
+        parser.add_argument('archmode', type=self.valid_archmode, required=True,
+                            location='json')
+        parser.add_argument('endian', type=self.valid_endianess, required=True,
                             location='json')
         args = parser.parse_args()
-        ASSEMBLY_STORE.bits = args.bits
-        ASSEMBLER.Reassemble(ASSEMBLY_STORE) 
+        ASSEMBLER.SetArchAndMode(args.archmode, args.endian)
+        ASSEMBLER.Disassemble(ASSEMBLY_STORE) 
         return jsonify(success=True, bits=args.bits), 201
     
     def get(self):
-        return jsonify(bits=ASSEMBLY_STORE.bits)
+        """
+        Return the assembler's current arch, mode and endianess
+        """
+        arch_mode = ASSEMBLER.arch_mode
+        endianess = ASSEMBLER.endianess
+        return jsonify(arch_mode=arch_mode, endianess=endianess)

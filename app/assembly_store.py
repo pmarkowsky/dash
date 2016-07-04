@@ -182,29 +182,15 @@ class AssemblyStore(object):
 
   def __init__(self):
     self.bits = 32
-    self.cpu = None
     self.display_labels = True
     self.rows = []
     self.cfg = None
     self.labels = set([])
-    self.SetCPU(X86)
 
     # add 20 empty rows by default.
     for i in xrange(20):
       self.rows.append(RowData(0, '', 0, '' ,'', '', i))
       
-  def SetCPU(self, arch):
-    arches = {X86: capstone.CS_ARCH_X86,
-              X64: capstone.CS_ARCH_X86,
-              ARM: capstone.CS_ARCH_ARM,
-              ARM64: capstone.CS_ARCH_ARM64,
-              MIPS: capstone.CS_ARCH_MIPS}
-    
-    if arch not in arches:
-      raise AssemblyStoreError("Invalid ARCH %s" % arch)
-    
-    self.cpu = arches[arch]
-
   def DeepCopyRow(self, index):
     """
     Fast deep copy of a row using cPickle
@@ -306,6 +292,15 @@ class AssemblyStore(object):
 
 
   def DeleteRow(self, index):
+    """
+    Delete a row in the assembly store.
+    
+    Args:
+      index: a positive integer index of the row data to delete.
+      
+    Returns:
+      N / A
+    """
     self.rows.pop(index)
 
     # update the row indices

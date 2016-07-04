@@ -14,6 +14,18 @@ import tempfile
 import capstone
 import keystone
 
+#constants
+LITTLE_ENDIAN    = 0
+BIG_ENDIAN       = 1
+X86_16           = 0
+X86_32           = 1
+X86_64           = 2
+ARM_16           = 3 #THUMB MODE
+ARM_32           = 4
+ARM_64           = 5
+MIPS_32          = 6
+
+
 
 class AssemblerError(Exception):
   """Generic exception class for Assembler Errors."""
@@ -30,58 +42,60 @@ class Assembler(object):
       A new Assembler instance
     """
     # we default to x86 in 32-bit mode
-    self.SetArchAndMode("X86", "32", "Little")
+    self.SetArchAndMode(X86_32, LITTLE_ENDIAN)
     
-  def SetArchAndMode(self, arch, mode, endianess):
+  def SetArchAndMode(self, arch_mode, endianess):
     """
     Set the architechture and mode to assemble and disassemble in
     """
-    arches_and_modes = {("X86", "16", "Little"): ((keystone.KS_ARCH_X86, 
+    arches_and_modes = {(X86_16, LITTLE_ENDIAN): ((keystone.KS_ARCH_X86, 
                                                    keystone.KS_MODE_16|keystone.KS_MODE_LITTLE_ENDIAN),
                                                   (capstone.CS_ARCH_X86,
                                                    capstone.CS_MODE_16|capstone.CS_MODE_LITTLE_ENDIAN)),
-                        ("X86", "32", "Little"): ((keystone.KS_ARCH_X86, 
+                        (X86_32, LITTLE_ENDIAN): ((keystone.KS_ARCH_X86, 
                                                   keystone.KS_MODE_32|keystone.KS_MODE_LITTLE_ENDIAN),
                                                   (capstone.CS_ARCH_X86,
                                                    capstone.CS_MODE_32|capstone.CS_MODE_LITTLE_ENDIAN)),
-                        ("X86", "64", "Little"): ((keystone.KS_ARCH_X86, 
+                        (X86_64, LITTLE_ENDIAN): ((keystone.KS_ARCH_X86, 
                                                   keystone.KS_MODE_64|keystone.KS_MODE_LITTLE_ENDIAN),
                                                   (capstone.CS_ARCH_X86,
                                                    capstone.CS_MODE_64|capstone.CS_MODE_LITTLE_ENDIAN)),
-                        ("ARM", "16", "Big"): ((keystone.KS_ARCH_ARM, 
+                        (ARM_16, BIG_ENDIAN): ((keystone.KS_ARCH_ARM, 
                                                 keystone.KS_MODE_THUMB|keystone.KS_MODE_BIG_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
                                                 capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
-                        ("ARM", "16", "Little"): ((keystone.KS_ARCH_ARM, 
+                        (ARM_16, LITTLE_ENDIAN): ((keystone.KS_ARCH_ARM, 
                                                 keystone.KS_MODE_THUMB|keystone.KS_MODE_LITTLE_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
                                                 capstone.CS_MODE_THUMB|capstone.CS_MODE_LITTLE_ENDIAN)),
-                        ("ARM", "32", "Big"): ((keystone.KS_ARCH_ARM, 
+                        (ARM_32,BIG_ENDIAN): ((keystone.KS_ARCH_ARM, 
                                                 keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
                                                 capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
-                        ("ARM", "32", "Little"): ((keystone.KS_ARCH_ARM, 
+                        (ARM_32, LITTLE_ENDIAN): ((keystone.KS_ARCH_ARM, 
                                                 keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
                                                 capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
-                        ("ARM64", "64", "Little"): ((keystone.KS_ARCH_ARM64, 
+                        (ARM_64, LITTLE_ENDIAN): ((keystone.KS_ARCH_ARM64, 
                                                 keystone.KS_MODE_64|keystone.KS_MODE_LITTLE_ENDIAN),
                                                 (capstone.CS_ARCH_ARM64,
                                                 capstone.CS_MODE_64|capstone.CS_MODE_LITTLE_ENDIAN)),
-                        ("MIPS", "32", "Big"): ((keystone.KS_ARCH_MIPS, 
+                        (MIPS_32, BIG_ENDIAN): ((keystone.KS_ARCH_MIPS, 
                                                 keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
                                                 capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
-                        ("MIPS", "32", "Little"): ((keystone.KS_ARCH_MIPS, 
+                        (MIPS_32, LITTLE_ENDIAN): ((keystone.KS_ARCH_MIPS, 
                                                 keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
                                                 capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN))
                         }
-    new_settings = arches_and_modes.get((arch, mode, endianess), None)
+    new_settings = arches_and_modes.get((arch_mode, endianess), None)
                                                               
     if not new_settings:
       # leave the settings as is
       return
+    self.arch_mode =  arch_mode
+    self.endianess = endianess
     
     self.asm_arch = new_settings[0][0]
     self.asm_mode = new_settings[0][1]

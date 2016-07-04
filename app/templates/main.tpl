@@ -132,9 +132,61 @@ function raw_asm_func () {
 }
 
 function set_bits(event) {
-  $.post("/bits", {bits: $(this).text()});
+  var bits = $(this).text();
   $("#bits-disp").text($(this).text());
-  update_asm_rows();
+  //get the currently selected architechture
+  var arch = $("#arch-disp").text();
+  //get the currently selected endianess
+  var endianess = $("#endian-disp").text();
+  set_archmode(arch, bits, endianess);
+}
+
+function set_arch(event) {
+  var old_arch = $("#arch-disp").text();
+  var arch = $(this).text();
+  $("#arch-disp").text($(this).text());
+  var bits = $("#bits-disp").text();
+  var endianess = $("#endian-disp").text();
+  if (!set_archmode(arch, bits, endianess)) {
+    $("#arch-disp").text(old_arch);
+  }
+}
+
+function set_endianess(event) {
+  var endianess = $(this).text();
+  $("#endian-disp").text($(this).text());
+  var arch = $("#arch-disp").text();
+  var bits = $("#bits-disp").text();
+  set_archmode(arch, bits, endianess);
+}
+
+function set_archmode(arch, bits, endianess) {
+  var arch_mode_str = arch + "-" + bits;
+  var arch_modes = {"x86-16": 0,
+                    "x86-32": 1,
+                    "x86-64": 2,
+                    "ARM-16": 3,
+                    "ARM-32": 4,
+                    "ARM64-64": 5,
+                    "MIPS-32": 6}
+  var arch_mode = arch_modes[arch_mode_str]
+  var endianess_vals = {"Little": "0", "Big": 1}
+  endianess = endianess_vals[endianess];
+  if (arch_mode !== undefined && endianess !== undefined) {
+    var ret_val = false;
+    $.ajax({
+      type: 'POST',
+      url: "/api/settings",
+      data: {"archmode": arch_mode, "endian": endianess},
+      success: function() {debugger; ret_val = true;},
+      dataType: 'json',
+      async:false
+    });
+    update_asm_rows();
+    return ret_val;
+  } else {
+    return false;
+  }
 }
 
 function build_asm_table_rows(table_rows) {
@@ -178,8 +230,9 @@ function update_asm_rows() {
      $(".asm-mnemonic").on("click", mnem_func);
      $(".asm-label").off();
      $(".asm-label").on("click", label_func);
-     $("#assemble-btn").on("click", raw_asm_func);
+     $(".asm-arch-option").on("click", set_arch);
      $(".asm-bits-option").on("click", set_bits);
+     $(".asm-endian-option").on("click", set_endianess);
      $(".asm-row").hover(update_current_row_id);
   });
 }
