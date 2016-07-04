@@ -120,18 +120,12 @@ var hotkeys_func = function (event) {
    // if i is pressed and we're not editing insert a row
    default: //do nothing
      break;
-     
    }
    update_asm_rows();
 }
 
-function raw_asm_func () {
-   var data = $(this).parent().parent().find("#asm_area").val();
-   $.post("/raw_nasm", {lines: data});
-   update_asm_rows();
-}
-
 function set_bits(event) {
+  event.stopPropagation();
   var bits = $(this).text();
   $("#bits-disp").text($(this).text());
   //get the currently selected architechture
@@ -142,6 +136,7 @@ function set_bits(event) {
 }
 
 function set_arch(event) {
+  event.stopPropagation();
   var old_arch = $("#arch-disp").text();
   var arch = $(this).text();
   $("#arch-disp").text($(this).text());
@@ -153,6 +148,7 @@ function set_arch(event) {
 }
 
 function set_endianess(event) {
+  event.stopPropagation();
   var endianess = $(this).text();
   $("#endian-disp").text($(this).text());
   var arch = $("#arch-disp").text();
@@ -176,8 +172,9 @@ function set_archmode(arch, bits, endianess) {
     var ret_val = false;
     $.ajax({
       type: 'POST',
+      contentType: 'application/json',
       url: "/api/settings",
-      data: {"archmode": arch_mode, "endian": endianess},
+      data: JSON.stringify({"archmode": arch_mode, "endian": endianess}),
       success: function() {debugger; ret_val = true;},
       dataType: 'json',
       async:false

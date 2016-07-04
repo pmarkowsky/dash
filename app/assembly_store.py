@@ -238,12 +238,13 @@ class AssemblyStore(object):
     Returns:
       N / A
     """
-    mnemonic = "%s %s" % (inst.mnemonic, inst.op_str())
+    mnemonic = "%s %s" % (inst.mnemonic, inst.op_str)
     row = RowData(0, '', inst.address, str(inst.bytes), mnemonic, '', 
                   index, in_use=True)
     # check to see if the instruction is a branch instruction else set it's target
     # to address plus length of instructionBytes
     self.InsertRowAt(index, row)
+    self.UpdateOffsetsAndAddresses()
 
   def InsertRowAt(self, index, row):
     """

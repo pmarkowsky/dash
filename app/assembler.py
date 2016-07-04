@@ -68,18 +68,17 @@ class Assembler(object):
                                                 keystone.KS_MODE_THUMB|keystone.KS_MODE_LITTLE_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
                                                 capstone.CS_MODE_THUMB|capstone.CS_MODE_LITTLE_ENDIAN)),
-                        (ARM_32,BIG_ENDIAN): ((keystone.KS_ARCH_ARM, 
-                                                keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
+                        (ARM_32,BIG_ENDIAN): ((keystone.KS_ARCH_ARM,
+                                               keystone.KS_MODE_ARM|keystone.KS_MODE_BIG_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
-                                                capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
+                                                capstone.CS_MODE_ARM|capstone.CS_MODE_BIG_ENDIAN)),
                         (ARM_32, LITTLE_ENDIAN): ((keystone.KS_ARCH_ARM, 
-                                                keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
+                                                keystone.KS_MODE_ARM|keystone.KS_MODE_BIG_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
-                                                capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
+                                                capstone.CS_MODE_ARM|capstone.CS_MODE_BIG_ENDIAN)),
                         (ARM_64, LITTLE_ENDIAN): ((keystone.KS_ARCH_ARM64, 
-                                                keystone.KS_MODE_64|keystone.KS_MODE_LITTLE_ENDIAN),
-                                                (capstone.CS_ARCH_ARM64,
-                                                capstone.CS_MODE_64|capstone.CS_MODE_LITTLE_ENDIAN)),
+                                                keystone.KS_MODE_LITTLE_ENDIAN),
+                                                (capstone.CS_ARCH_ARM64, capstone.CS_MODE_LITTLE_ENDIAN)),
                         (MIPS_32, BIG_ENDIAN): ((keystone.KS_ARCH_MIPS, 
                                                 keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
@@ -243,8 +242,7 @@ class Assembler(object):
       self.RelaxInstructions(store, label_fixup_rows, known_label_addresses)
       
     return
-
-
+  
   def Disassemble(self, index, store):
     """
     Disassembles the instruction given the opcode string taken from a row at

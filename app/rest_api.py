@@ -175,8 +175,9 @@ class AssemblyStoreSettings(Resource):
                             location='json')
         args = parser.parse_args()
         ASSEMBLER.SetArchAndMode(args.archmode, args.endian)
-        ASSEMBLER.Disassemble(ASSEMBLY_STORE) 
-        return jsonify(success=True, bits=args.bits), 201
+        ASSEMBLY_STORE.ClearErrors()
+        ASSEMBLER.Disassemble(0, ASSEMBLY_STORE) 
+        return jsonify(success="1")
     
     def get(self):
         """
