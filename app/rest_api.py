@@ -119,8 +119,8 @@ class TableRow(Resource):
             if args.mnemonic != row.mnemonic:
                 new_mnemonics = args.mnemonic.split(';')
                 self.insert_multiple_rows_by_mnemonic(row, new_mnemonics)
-                
-            ASSEMBLY_STORE.UpdateRow(row.index, row)
+            else:
+                ASSEMBLY_STORE.UpdateRow(row.index, row)
             ASSEMBLER.Assemble(row.index, ASSEMBLY_STORE)
             
         row = ASSEMBLY_STORE.GetRow(row.index)

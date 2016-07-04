@@ -128,7 +128,6 @@ class Assembler(object):
     
     #last rounds label addresses
     last_rounds_label_addresses = labels
-    import pdb; pdb.set_trace()
     
     while not done_relaxing:
       for row in store.GetRowsIterator():
