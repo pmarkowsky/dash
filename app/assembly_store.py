@@ -19,7 +19,7 @@ MIPS = 'mips'
 
 class RowData(object):
   """
-  Object representing an individual row of assembly.
+  Object representing an individual row of assembly. 
   """
   def __init__(self, offset, label, address, opcode, mnemonic, comment, 
                index=0, in_use=False, stack_delta=0):
@@ -99,12 +99,6 @@ class RowData(object):
       self.mnemonic = '<INVALID OPCODE SUPPLIED>'
       self.error = True
       
-  def DisplayMnemonic(self):
-    """
-    Format the Mnemonic for display
-    """
-    pass
-
   def SetMnemonic(self, mnemonic):
     """
     Set the mnemonic of the row.
