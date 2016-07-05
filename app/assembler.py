@@ -2,13 +2,8 @@
 Module that encapsilates all assembling and disassembling logic for Dash.
 """
 import binascii
-import os 
-import platform
-import subprocess
-import string
+import re
 import struct
-import sys
-import tempfile
 
 # third party modules
 import capstone
@@ -24,7 +19,6 @@ ARM_16           = 3 #THUMB MODE
 ARM_32           = 4
 ARM_64           = 5
 MIPS_32          = 6
-
 
 
 class AssemblerError(Exception):
@@ -119,6 +113,134 @@ class Assembler(object):
         return True
     return False
   
+  def HandleNumber(self, value_str, max_size):
+    """
+    Logic for handline handling parsing the numerical portions of data 
+    definitions instructions such as 
+      db 0xff 
+      dw 0xffff 
+      dd 0xfffffffff
+      dq 0xffffffffffffffff
+      
+    Args:
+      value_str: A string containing the integer value to convert
+      max_size: The maximum size as defined by the command the value_str 
+                cannot exceed this size.
+      
+    Returns:
+      None on error or the integer value of the result.
+    """
+    if value_str.startswith('0x'):
+      base = 16
+    else:
+      base = 10
+    try:
+        value = int(value_str, base)
+        if value >= max_size:
+          return None
+        else:
+          return value
+    except ValueError as exc:
+        return None
+      
+  def HandleStringDataDefinition(self, mnemonic):
+    """
+    Handle a String operand for a data definiton. e.g. ds "blahahafh"
+    
+    Args:
+      mnemonic: 
+      
+    Returns:
+      None, None on error or the pack string and the string 
+      to pack otherwise.
+    """
+    # we match all ascii characters except for double quotes chars to avoid
+    # balancing this can be fixed later
+    mnemonic = mnemonic.strip()
+    match = re.search("\"([\x01-\x21\x23-\x7f]*)\"$", mnemonic)
+    if not match:
+      return (None, None)
+    # this will automatically NULL terminate the string
+    pack_string = "%ds" % (len(mnemonic) + 1)
+    # extract the string delimited by the double quotes
+    data = match.group(1)
+    return pack_string, data
+  
+  def HandleByteDataDefinition(self, mnemonic):
+    """
+    Handle instrucitons like db 0x44 or db 0x00, 0x04, 0x08, 0x10
+    
+    Args:
+      mnemonic: a string representing the numeric operands separated by commas
+      
+    Returns:
+      None, None on error or the pack string and a string of byte values
+    """
+    pack_string = ""
+    byte_values = ""
+    for operand in mnemonic.split(","):
+      value = self.HandleNumber(operand.strip(), max_size)
+      if value == None:
+        return None, None
+      else:
+        pack_string += "B"
+        byte_values.append(value)
+    return pack_string, byte_values
+
+  def HandleDataDefinitionInstruction(self, mnemonic):
+    """
+    Convert a data definition instruciton to it's respective bytes.
+    
+    Args:
+      mnemonic: A string mnemonic that defines raw bytes the assembler 
+                should skip over
+    
+    Returns:
+      A string of byte values or None when the value cannot be parsed or 
+      exceeds the range.
+    """
+    if self.endianess == LITTLE_ENDIAN:
+      pack_string =  '<'
+    else:
+      pack_string =  '>'
+      
+    value = None
+    
+    inst_fields = mnemonic.split()
+    
+    # guantee we have at least one operand here
+    if inst_fields < 2:
+      return None
+    
+    # check to see if this is a dw, dd, or dq instruction.
+    operation = inst_fields[0].upper()
+    if operation == 'DW':
+      value = [self.HandleNumber(inst_fields[1], 0xffff)]
+      pack_string += "H"
+    elif operation == 'DD':
+      value = [self.HandleNumber(inst_fields[1], 0xffffffff)]
+      pack_string += "I"
+    # create a qword value
+    elif operation == 'DQ':
+      value = [self.HandleNumber(inst_fields[1], 0xffffffffffffffff)]
+      pack_string += "Q"
+    # handle a ds instruction as ds "bytes", 0x0
+    elif operation == 'DS':
+      extra_pack_str, value = self.HandleStringDataDefinition(inst_fields[1])
+      if extra_pack_str:
+        pack_string += extra_pack_str
+        value = [value]
+    # handle a db instruction as db byte or db byte, byte, byte, byte
+    elif operation == 'DB':
+      extra_pack_str, value = self.HandleByteDataDefinition(inst_fields[1:])
+      if extra_pack_str:
+        pack_string += extra_pack_str
+        
+    if value != None:
+      return struct.pack(pack_string, *value)
+    else:
+      return None
+  
   def RelaxInstructions(self, store, list_of_fixups, labels):
     """
     Relax assembly instructions as necessary.
@@ -208,6 +330,19 @@ class Assembler(object):
        
       if row.label:
         known_label_addresses[row.label.upper()] = cur_addr
+        
+      if self.IsADataDefinitionInstruction(row.mnemonic):
+        import pdb; pdb.set_trace()
+        encoded_bytes = self.HandleDataDefinitionInstruction(row.mnemonic)
+        if encoded_bytes:
+          row.opcode = encoded_bytes
+          row.address = cur_addr
+          cur_addr += len(encoded_bytes)
+          store.UpdateRow(row.index, row)
+          continue
+        else:
+          store.SetErrorAtIndex(row.index)
+          continue
         
       try:
         # check if this row contains a label and adjust the mnemonic we're assembling
