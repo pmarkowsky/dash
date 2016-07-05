@@ -108,7 +108,7 @@ class Assembler(object):
     Returns:
       True if it's an instruction that defines data. False otherwise.
     """
-    for inst in ['DB', 'DW', 'DD', 'DQ']:
+    for inst in ['DB', 'DW', 'DD', 'DQ', 'DS']:
       if mnemonic.upper().strip().startswith(inst):
         return True
     return False
@@ -161,9 +161,9 @@ class Assembler(object):
     if not match:
       return (None, None)
     # this will automatically NULL terminate the string
-    pack_string = "%ds" % (len(mnemonic) + 1)
     # extract the string delimited by the double quotes
-    data = match.group(1)
+    data = bytes(match.group(1))
+    pack_string = "%ds" % (len(data) + 1)
     return pack_string, data
   
   def HandleByteDataDefinition(self, mnemonic):
@@ -177,9 +177,9 @@ class Assembler(object):
       None, None on error or the pack string and a string of byte values
     """
     pack_string = ""
-    byte_values = ""
+    byte_values = []
     for operand in mnemonic.split(","):
-      value = self.HandleNumber(operand.strip(), max_size)
+      value = self.HandleNumber(operand.strip(), 256)
       if value == None:
         return None, None
       else:
@@ -229,10 +229,10 @@ class Assembler(object):
       extra_pack_str, value = self.HandleStringDataDefinition(inst_fields[1])
       if extra_pack_str:
         pack_string += extra_pack_str
-        value = [value]
+        return struct.pack(pack_string, value)
     # handle a db instruction as db byte or db byte, byte, byte, byte
     elif operation == 'DB':
-      extra_pack_str, value = self.HandleByteDataDefinition(inst_fields[1:])
+      extra_pack_str, value = self.HandleByteDataDefinition(" ".join(inst_fields[1:]))
       if extra_pack_str:
         pack_string += extra_pack_str
         
@@ -332,7 +332,6 @@ class Assembler(object):
         known_label_addresses[row.label.upper()] = cur_addr
         
       if self.IsADataDefinitionInstruction(row.mnemonic):
-        import pdb; pdb.set_trace()
         encoded_bytes = self.HandleDataDefinitionInstruction(row.mnemonic)
         if encoded_bytes:
           row.opcode = encoded_bytes
