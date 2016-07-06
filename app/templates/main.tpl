@@ -175,7 +175,7 @@ function set_archmode(arch, bits, endianess) {
       contentType: 'application/json',
       url: "/api/settings",
       data: JSON.stringify({"archmode": arch_mode, "endian": endianess}),
-      success: function() {debugger; ret_val = true;},
+      success: function() {ret_val = true;},
       dataType: 'json',
       async:false
     });

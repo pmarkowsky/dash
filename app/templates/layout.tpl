@@ -22,14 +22,14 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand logo" href='/'><img src="{{url_for('static', filename='img/logo.png')}}" style=" width: 64px;">DASH</a>
+          <a class="brand logo" href='/' style="font-family: fantasy;font-size:large;"><img src="{{url_for('static', filename='img/logo.png')}}" style=" width: 64px;">DASH</a>
         </div>
         
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
              <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">ARCH:<span id="arch-disp">x86</span><span class="caret"></span></a>
-                    <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
+                    <ul class="dropdown-menu">
                       <li class="asm-arch-option" role="presentation">x86</li>
                       <li class="asm-arch-option" role="presentation">ARM</li>
                       <li class="asm-arch-option" role="presentation">ARM64</li>
@@ -38,7 +38,7 @@
               </li>
              <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">BITS:<span id="bits-disp">32</span><span class="caret"></span></a>
-                    <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu2">
+                    <ul class="dropdown-menu">
                       <li class="asm-bits-option" role="presentation">16</li>
                       <li class="asm-bits-option" role="presentation">32</li>
                       <li class="asm-bits-option" role="presentation">64</li>
@@ -46,7 +46,7 @@
               </li>
               <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">ENDIANESS:<span id="endian-disp">Little</span><span class="caret"></span></a>
-                    <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu3">
+                    <ul class="dropdown-menu">
                       <li class="asm-endian-option" role="presentation">Little</li>
                       <li class="asm-endian-option" role="presentation">Big</li>
                     </ul>
@@ -70,7 +70,6 @@
   <div class="row">
   </div><!-- row -->
  <footer>
-        <p>&copy; Dash 2016</p>
  </footer>
 
 </div><!-- container -->
