@@ -13,7 +13,8 @@
 </head>
 
 <body>
-<nav class="navbar navbar-default navbar-grey blue" role="navigation">
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
             <span class="sr-only">Toggle navigation</span>
@@ -21,48 +22,38 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-        </div>
-        
-        <div class="navbar-inner">
-          <a class="brand logo" href='/'>DASH</a>
+          <a class="brand logo" href='/'><img src="{{url_for('static', filename='img/logo.png')}}" style=" width: 64px;">DASH</a>
         </div>
         
         <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav pull-right">
-             <li><button class="btn">
-                <div class="dropdown">
+          <ul class="nav navbar-nav navbar-right">
+             <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">ARCH:<span id="arch-disp">x86</span><span class="caret"></span></a>
                     <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
-                      <li class="asm-arch-option" role="presentation" id="set-arch-x86">x86</li>
-                      <li class="asm-arch-option" role="presentation" id="set-bits-arm">ARM</li>
-                      <li class="asm-arch-option" role="presentation" id="set-bits-arm64">ARM64</li>
-                      <li class="asm-arch-option" role="presentation" id="set-bits-mips">MIPS</li>
+                      <li class="asm-arch-option" role="presentation">x86</li>
+                      <li class="asm-arch-option" role="presentation">ARM</li>
+                      <li class="asm-arch-option" role="presentation">ARM64</li>
+                      <li class="asm-arch-option" role="presentation">MIPS</li>
                     </ul>
-                </div>
-              </button></li>
-
-             <li><button class="btn">
-                <div class="dropdown">
+              </li>
+             <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">BITS:<span id="bits-disp">32</span><span class="caret"></span></a>
-                    <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
-                      <li class="asm-bits-option" role="presentation" id="set-bits-16">16</li>
-                      <li class="asm-bits-option" role="presentation" id="set-bits-32">32</li>
-                      <li class="asm-bits-option" role="presentation" id="set-bits-64">64</li>
+                    <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu2">
+                      <li class="asm-bits-option" role="presentation">16</li>
+                      <li class="asm-bits-option" role="presentation">32</li>
+                      <li class="asm-bits-option" role="presentation">64</li>
                     </ul>
-                </div>
-              </button></li>
-              <li><button class="btn">
-                <div class="dropdown">
+              </li>
+              <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">ENDIANESS:<span id="endian-disp">Little</span><span class="caret"></span></a>
-                    <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
-                      <li class="asm-endian-option" role="presentation" id="set-little-endian">Little</li>
-                      <li class="asm-endian-option" role="presentation" id="set-big-endian">Big</li>
+                    <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownMenu3">
+                      <li class="asm-endian-option" role="presentation">Little</li>
+                      <li class="asm-endian-option" role="presentation">Big</li>
                     </ul>
-                </div>
-              </button></li>
-
+              </li>
           </ul>
         </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
 </nav> <!-- navbar -->
 
 {% for message in get_flashed_messages() %}
