@@ -1,10 +1,8 @@
-# Dash -- the quick dash assembler / disassembler
+# Dash - the quick dash assembler / disassembler
 
-A simple web assembler / disassembler
+Dash is a simple flask based web application for writing and editing assembly. 
 
-Dash is a simple flask based web application for editing and 
-
-Think of it as a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) for assembly languages.
+Think of it as a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) for various assembly languages.
 
 # Installation
 
