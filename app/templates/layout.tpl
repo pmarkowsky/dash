@@ -30,25 +30,26 @@
              <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">ARCH:<span id="arch-disp">x86</span><span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li class="asm-arch-option" role="presentation">x86</li>
-                      <li class="asm-arch-option" role="presentation">ARM</li>
-                      <li class="asm-arch-option" role="presentation">ARM64</li>
-                      <li class="asm-arch-option" role="presentation">MIPS</li>
+                      <li><a href="#" class="asm-arch-option">x86</a></li>
+                      <li><a href="#" class="asm-arch-option">ARM</a></li>
+                      <li><a href="#" class="asm-arch-option">ARM64</a></li>
+                      <li><a href="#" class="asm-arch-option">MIPS</a></li>
                     </ul>
               </li>
+              
              <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">BITS:<span id="bits-disp">32</span><span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li class="asm-bits-option" role="presentation">16</li>
-                      <li class="asm-bits-option" role="presentation">32</li>
-                      <li class="asm-bits-option" role="presentation">64</li>
+                      <li><a href="#" class="asm-bits-option">16</a></li>
+                      <li><a href="#" class="asm-bits-option">32</a></li>
+                      <li><a href="#" class="asm-bits-option">64</a></li>
                     </ul>
               </li>
               <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">ENDIANESS:<span id="endian-disp">Little</span><span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li class="asm-endian-option" role="presentation">Little</li>
-                      <li class="asm-endian-option" role="presentation">Big</li>
+                      <li><a href="#" class="asm-endian-option">Little</a></li>
+                      <li><a href="#" class="asm-endian-option">Big</a></li>
                     </ul>
               </li>
           </ul>
