@@ -60,16 +60,21 @@ class TableRow(Resource):
     """
     Rest API responsible for updating and retrieving individual table rows.
     """
-    def insert_multiple_rows_by_mnemonic(self, current_row, mnemonics):
+    def InsertMultipleRowsByMnemonic(self, current_row, mnemonics):
         """
-        Insert mutliple instructions at once using the mnemonic field.
+        Insert multiple instructions at once using the mnemonic field.
         """
         #update current row
-        current_row.SetMnemonic(mnemonics[0])
+        mnemonic_fields = mnemonics[0].split() 
+        operation_str = mnemonic_fields[0].upper()
+        current_row.SetMnemonic(operation_str + ' ' + ' '.join(mnemonic_fields[1:]))
         ASSEMBLY_STORE.UpdateRow(current_row.index, current_row)
         
         for i in xrange(1, len(mnemonics)):
-            row = RowData(0, "", 0, "", mnemonics[i], "", 
+            mnemonic_fields = mnemonics[i].split() 
+            operation_str = mnemonic_fields[0].upper()
+            mnemonic_str = operation_str + ' ' + ' '.join(mnemonic_fields[1:])
+            row = RowData(0, "", 0, "", mnemonic_str, "", 
                           index=current_row.index + i, in_use=True)
             ASSEMBLY_STORE.InsertRowAt(i, row)
             
@@ -121,7 +126,7 @@ class TableRow(Resource):
             
             if args.mnemonic != row.mnemonic:
                 new_mnemonics = args.mnemonic.split(';')
-                self.insert_multiple_rows_by_mnemonic(row, new_mnemonics)
+                self.InsertMultipleRowsByMnemonic(row, new_mnemonics)
             else:
                 ASSEMBLY_STORE.UpdateRow(row.index, row)
             ASSEMBLER.Assemble(row.index, ASSEMBLY_STORE)
