@@ -232,7 +232,7 @@ class AssemblyStore(object):
     Returns:
       N / A
     """
-    mnemonic = "%s %s" % (inst.mnemonic, inst.op_str)
+    mnemonic = "%s %s" % (inst.mnemonic.upper(), inst.op_str)
     row = RowData(0, '', inst.address, str(inst.bytes), mnemonic, '', 
                   index, in_use=True)
     # check to see if the instruction is a branch instruction else set it's target
