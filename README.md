@@ -4,7 +4,7 @@ A simple web assembler / disassembler
 
 Dash is a simple flask based web application for editing and 
 
-Think of it as a [REPL]{https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop} for 
+Think of it as a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) for 
 
 
 # Installation
