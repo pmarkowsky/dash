@@ -117,7 +117,7 @@ class TableRow(Resource):
                 self.InsertMultipleRowsByMnemonic(row, new_mnemonics)
             else:
                 ASSEMBLY_STORE.UpdateRow(row.index, row)
-            ASSEMBLER.Assemble(row.index, ASSEMBLY_STORE)
+            ASSEMBLER.Assemble(ASSEMBLY_STORE)
             
         row = ASSEMBLY_STORE.GetRow(row.index)
         return row.ToDict()

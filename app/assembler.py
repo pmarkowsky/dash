@@ -318,14 +318,13 @@ class Assembler(object):
       else:
         last_rounds_label_addresses = labels
   
-  def Assemble(self, index, store):
+  def Assemble(self, store):
     """Assemble the mnemonics provided in the store.
     
     This will assemble all instructions before and after in order to support 
     labels
     
     Args:
-      index: an integer describing the currently selected row in the table.
       store: An AssemblyStore instance
     
     Returns:
