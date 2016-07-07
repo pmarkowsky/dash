@@ -26,9 +26,8 @@ LOGGER.setLevel(logging.ERROR)
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(format)
+console_handler.setFormatter(formatter)
 LOGGER.addHandler(console_handler)
-
 
 
 class AssemblerError(Exception):
@@ -85,11 +84,11 @@ class Assembler(object):
                                                 (capstone.CS_ARCH_ARM64, capstone.CS_MODE_LITTLE_ENDIAN)),
                         (MIPS_32, BIG_ENDIAN): ((keystone.KS_ARCH_MIPS, 
                                                 keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
-                                                (capstone.CS_ARCH_ARM,
+                                                (capstone.CS_ARCH_MIPS,
                                                 capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
                         (MIPS_32, LITTLE_ENDIAN): ((keystone.KS_ARCH_MIPS, 
                                                 keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
-                                                (capstone.CS_ARCH_ARM,
+                                                (capstone.CS_ARCH_MIPS,
                                                 capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN))
                         }
     new_settings = arches_and_modes.get((arch_mode, endianess), None)
