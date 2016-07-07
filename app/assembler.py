@@ -74,7 +74,7 @@ class Assembler(object):
                         (ARM_16, BIG_ENDIAN): ((keystone.KS_ARCH_ARM, 
                                                 keystone.KS_MODE_THUMB|keystone.KS_MODE_BIG_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
-                                                capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
+                                                capstone.CS_MODE_THUMB|capstone.CS_MODE_BIG_ENDIAN)),
                         (ARM_16, LITTLE_ENDIAN): ((keystone.KS_ARCH_ARM, 
                                                 keystone.KS_MODE_THUMB|keystone.KS_MODE_LITTLE_ENDIAN),
                                                 (capstone.CS_ARCH_ARM,
