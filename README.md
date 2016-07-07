@@ -6,7 +6,7 @@ Think of it as a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93
 
 # Installation
 
-Dash depends on [capstone](http://www.capstone-engine.org/) and [keystone](http://www.keystone-engine.org/). So first things first install those as per the docs on their sites.
+Dash depends on Python 2.7, [capstone](http://www.capstone-engine.org/) and [keystone](http://www.keystone-engine.org/). So first things first install those as per the docs on their sites.
 
 Once you've installed capstone and keystone, use pip to install all of the flask requirements. 
 
