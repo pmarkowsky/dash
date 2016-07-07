@@ -18,9 +18,11 @@ This will install flask-restful.
 
 To start from the command line where you've checked out dash go run
 
-`python webasm.py`
+`python dash.py`
 
-This will start the server on port 5555,browse there and away you go. 
+This will start the server on port 5555,browse there and away you go.
+
+![basic_session](https://pbs.twimg.com/media/Cmr52ejUkAAcyqO.jpg)
 
 ## Writing Basic Assembly
 
