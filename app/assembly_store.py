@@ -240,6 +240,7 @@ class AssemblyStore(object):
     Insert a new row at the index and update the offsets and addresses
     """
     self.rows.insert(index, row)
+    self.rows[index].index = index
 
     for i in xrange(index + 1, len(self.rows)):
       self.rows[i].index = i
