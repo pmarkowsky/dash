@@ -178,8 +178,7 @@ class AssemblyStore(object):
     self.labels = set([])
 
     # add 20 empty rows by default.
-    for i in xrange(20):
-      self.rows.append(RowData(0, '', 0, '' ,'', '', i))
+    self.AddRows(20)
       
   def DeepCopyRow(self, index):
     """
@@ -247,13 +246,15 @@ class AssemblyStore(object):
 
     self.UpdateOffsetsAndAddresses()
 
-  def AddTenRows(self):
+  def AddRows(self, num_rows, starting_index=None):
     """
-    Append 10 empty rows to the store.
+    Append num_rows empty rows to the store.
     """
-    starting_index = len(self.rows)
-    for i in xrange(10):
-      self.rows.append(RowData(0, '','','','','', starting_index))
+    if starting_index == None:
+      starting_index = len(self.rows)
+    
+    for i in xrange(num_rows):
+      self.rows.append(RowData(0, '',0,'','','', starting_index))
       starting_index += 1
 
   def ContainsLabel(self, row_asm):

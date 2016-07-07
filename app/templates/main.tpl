@@ -125,18 +125,21 @@ var hotkeys_func = function (event) {
 }
 
 function set_bits(event) {
-  event.stopPropagation();
-  var bits = $(this).text();
+  event.stopImmediatePropagation();
+  var old_bits = $("#bits-disp").text();
+  var new_bits = $(this).text();
   $("#bits-disp").text($(this).text());
   //get the currently selected architechture
   var arch = $("#arch-disp").text();
   //get the currently selected endianess
   var endianess = $("#endian-disp").text();
-  set_archmode(arch, bits, endianess);
+  if (!set_archmode(arch, bits, endianess)) {
+   $("#bits-disp").text(old_bits);
+  }
 }
 
 function set_arch(event) {
-  event.stopPropagation();
+  event.stopImmediatePropagation();
   var old_arch = $("#arch-disp").text();
   var arch = $(this).text();
   $("#arch-disp").text($(this).text());
@@ -148,12 +151,15 @@ function set_arch(event) {
 }
 
 function set_endianess(event) {
-  event.stopPropagation();
+  event.stopImmediatePropagation();
+  var old_endianess = $("#endian-disp").text();
   var endianess = $(this).text();
   $("#endian-disp").text($(this).text());
   var arch = $("#arch-disp").text();
   var bits = $("#bits-disp").text();
-  set_archmode(arch, bits, endianess);
+  if(!set_archmode(arch, bits, endianess)) {
+    $("#endian-disp").text(old_endianess);
+  }
 }
 
 function set_archmode(arch, bits, endianess) {

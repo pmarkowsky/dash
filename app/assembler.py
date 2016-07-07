@@ -385,6 +385,41 @@ class Assembler(object):
       
     return
   
+  def DisassembleAll(self, store):
+    """
+    Disassemble all rows from bytes.
+    
+    This is normally only called if dash is instructed to switch between CPU
+    modes.
+    
+    Args:
+      store: an AssemblyStore instance
+      
+    Returns:
+      N / A 
+      
+    Side Effects:
+      Creates a new set of rows based on disassembling the bytes in the
+      AssemblyStore mode.
+    """
+    byte_buffer = ""
+    starting_address = None
+    for row in store.GetRowsIterator():
+      if not starting_address:
+        starting_address = row.address
+      byte_buffer += row.opcode
+      
+    # clear out all of the rows
+    store.Reset()
+    store.AddRows(20)
+    
+    insts = self.disassembler.disasm(byte_buffer, starting_address)
+    index = 0
+    for inst in insts:
+      store.CreateRowFromCapstoneInst(index, inst)
+      index += 1
+    
+  
   def Disassemble(self, index, store):
     """
     Disassembles the instruction given the opcode string taken from a row at
