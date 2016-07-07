@@ -7,10 +7,6 @@ Author: Pete Markowsky <peterm@vodun.org>
 import binascii
 import cPickle
 
-import capstone
-import keystone
-#import distorm3
-
 X86 = 'x86'
 X64 = 'x64'
 ARM = 'arm'

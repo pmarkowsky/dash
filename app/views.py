@@ -3,7 +3,7 @@ views.py: main views page. Controls business logic of processing forms.
 
 Author: Pete Markowsky <peterm@vodun.org>
 """
-from flask import render_template, request
+from flask import render_template
 from flask.ext import restful
 
 from app.rest_api import AssemblyStoreSettings, TableRow, TableRowList

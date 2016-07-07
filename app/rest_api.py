@@ -1,14 +1,12 @@
 """
 rest_api.py: a REST API for updating and retrieving assembly information in the asm_store.
 """
-import binascii
-
 #third-party modules
-from flask import jsonify, abort, request
-from flask.ext.restful import Resource, reqparse, marshal, marshal_with, fields
+from flask import jsonify, abort
+from flask.ext.restful import Resource, reqparse, marshal_with, fields
 
 #app specific modules
-from assembler import Assembler, AssemblerError
+from assembler import Assembler
 from assembler import X86_16,X86_32,X86_64, ARM_16,ARM_32,ARM_64,MIPS_32, \
      BIG_ENDIAN,LITTLE_ENDIAN
 
@@ -34,19 +32,9 @@ TABLE_ROW_LIST_FIELDS = {"rows": fields.List(fields.Nested(TABLE_ROW_FIELDS))}
 
 
 class TableRowList(Resource):
-    def post(self):
-        """
-        Add a new table row at an index
-        """
-        parser = reqparse.RequestParser()
-        parser.add_argument('index', type=int, required=True, location='json')
-        
-        args = parser.parse_args()
-        row = RowData(0, '', 0, '' ,'', '', index)
-        AssemblyStore.InsertRowAt(index, row)
-        
-        return marshal(row.ToDict(), TABLE_ROW_FIELDS), 201
-        
+    """
+    Simple API to retrieve all rows as JSON.
+    """
     @marshal_with(TABLE_ROW_LIST_FIELDS)
     def get(self):
         """

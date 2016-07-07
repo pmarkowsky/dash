@@ -2,6 +2,7 @@
 Module that encapsilates all assembling and disassembling logic for Dash.
 """
 import binascii
+import logging
 import re
 import struct
 
@@ -9,7 +10,7 @@ import struct
 import capstone
 import keystone
 
-#constants
+# constants
 LITTLE_ENDIAN    = 0
 BIG_ENDIAN       = 1
 X86_16           = 0
@@ -19,6 +20,15 @@ ARM_16           = 3 #THUMB MODE
 ARM_32           = 4
 ARM_64           = 5
 MIPS_32          = 6
+
+LOGGER = logging.getLogger("assembler_module")
+LOGGER.setLevel(logging.ERROR)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(format)
+LOGGER.addHandler(console_handler)
+
 
 
 class AssemblerError(Exception):
@@ -141,7 +151,8 @@ class Assembler(object):
         else:
           return value
     except ValueError as exc:
-        return None
+      LOGGER.error(str(exc))
+      return None
       
   def HandleStringDataDefinition(self, mnemonic):
     """
@@ -285,8 +296,7 @@ class Assembler(object):
               labels[row.label] = row.address
           
         except Exception as exc:
-          # TODO: replace this with logging
-          print str(exc)
+          LOGGER.error(str(exc))
           store.SetErrorAtIndex(row.index)
           break
         
@@ -365,8 +375,7 @@ class Assembler(object):
         cur_addr += len(encoded_bytes)
         store.UpdateRow(row.index, row)
       except Exception as exc:
-        # TODO: replace this with logging
-        print str(exc)
+        LOGGER.error(str(exc))
         store.SetErrorAtIndex(row.index)
         break
       
