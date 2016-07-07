@@ -50,6 +50,14 @@ class Assembler(object):
   def SetArchAndMode(self, arch_mode, endianess):
     """
     Set the architechture and mode to assemble and disassemble in
+   
+    Args:
+      arch_mode: an Integer describing the architechture and mode to assemble
+                 / disassemble in
+      endianess: the endianess of the memory to configure for
+      
+    Returns:
+      self
     """
     arches_and_modes = {(X86_16, LITTLE_ENDIAN): ((keystone.KS_ARCH_X86, 
                                                    keystone.KS_MODE_16|keystone.KS_MODE_LITTLE_ENDIAN),
@@ -105,6 +113,7 @@ class Assembler(object):
     self.disasm_mode = new_settings[1][1]
     self.assembler = keystone.Ks(self.asm_arch, self.asm_mode)
     self.disassembler = capstone.Cs(self.disasm_arch, self.disasm_mode)
+    return self
     
 
   def IsADataDefinitionInstruction(self, mnemonic):
