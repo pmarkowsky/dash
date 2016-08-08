@@ -1,8 +1,10 @@
 """
 rest_api.py: a REST API for updating and retrieving assembly information in the asm_store.
 """
+import binascii
+
 #third-party modules
-from flask import jsonify, abort
+from flask import jsonify, abort, render_template
 from flask.ext.restful import Resource, reqparse, marshal_with, fields
 
 #app specific modules
@@ -42,7 +44,7 @@ class TableRowList(Resource):
         """
         row_data = [row.ToDict() for row in ASSEMBLY_STORE.GetRows()]
         return {"rows": row_data}
-        
+
 
 class TableRow(Resource):
     """
@@ -57,7 +59,7 @@ class TableRow(Resource):
         operation_str = mnemonic_fields[0].upper()
         current_row.SetMnemonic(operation_str + ' ' + ' '.join(mnemonic_fields[1:]))
         ASSEMBLY_STORE.UpdateRow(current_row.index, current_row)
-        
+
         for i in xrange(1, len(mnemonics)):
             mnemonic_fields = mnemonics[i].split() 
             operation_str = mnemonic_fields[0].upper()
@@ -65,15 +67,15 @@ class TableRow(Resource):
             row = RowData(0, "", 0, "", mnemonic_str, "", 
                           index=current_row.index + i, in_use=True)
             ASSEMBLY_STORE.InsertRowAt(i, row)
-            
+
     @marshal_with(TABLE_ROW_FIELDS)
     def put(self, row_index):
         """
         Edit the values of a row via an HTTP PUT request.
-        
+
         Args:
           row_index: an integer index into the assembly store
-        
+
         Returns:
           A tuple of http return code and a dictionary to be serialized to JSON
         """
@@ -81,7 +83,7 @@ class TableRow(Resource):
             row = ASSEMBLY_STORE.GetRow(row_index)
         except AssemblyStoreError:
             abort(404)
-            
+
         parser = reqparse.RequestParser()
         parser.add_argument('offset', type=int, default=row.offset, 
                             location='json')
@@ -99,40 +101,40 @@ class TableRow(Resource):
         row.SetAddress(args.address)
         row.SetComment(args.comment)
         row.in_use = args.in_use
-        
+
         ASSEMBLY_STORE.UpdateRow(row.index, row)
-        
+
         if str(args.opcode).strip() != row.opcode:
             row.SetOpcode(args.opcode)
             ASSEMBLY_STORE.UpdateRow(row.index, row)
-            
+
             if row.error:
                 return row.ToDict()
 
             ASSEMBLER.Disassemble(row.index, ASSEMBLY_STORE)
         else:
-            
+
             if args.mnemonic != row.mnemonic:
                 new_mnemonics = args.mnemonic.split(';')
                 self.InsertMultipleRowsByMnemonic(row, new_mnemonics)
             else:
                 ASSEMBLY_STORE.UpdateRow(row.index, row)
             ASSEMBLER.Assemble(ASSEMBLY_STORE)
-            
+
         row = ASSEMBLY_STORE.GetRow(row.index)
         return row.ToDict()
-                
-        
+
+
     @marshal_with(TABLE_ROW_FIELDS)
     def get(self, row_index):
         try:
             row = ASSEMBLY_STORE.GetRow(row_index)
         except AssemblyStoreError:
             abort(404)
-            
+
         return row.ToDict()
-    
-    
+
+
 class AssemblyStoreSettings(Resource):
     """
     REST calls for changing assembler arch settings.
@@ -146,7 +148,7 @@ class AssemblyStoreSettings(Resource):
             raise ValueError("Invalid arch_mode specified")
         else:
             return result
-        
+
     def valid_endianess(self, value):
         """
         Ensure that the endian
@@ -156,7 +158,7 @@ class AssemblyStoreSettings(Resource):
             raise ValueError("Invalid endianess specified")
         else:
             return result
-        
+
     def post(self):
         """
         Handle setting the architechture settings.
@@ -171,7 +173,7 @@ class AssemblyStoreSettings(Resource):
         ASSEMBLY_STORE.ClearErrors()
         ASSEMBLER.DisassembleAll(ASSEMBLY_STORE) 
         return jsonify(success="1")
-    
+
     def get(self):
         """
         Return the assembler's current arch, mode and endianess
@@ -179,3 +181,51 @@ class AssemblyStoreSettings(Resource):
         arch_mode = ASSEMBLER.arch_mode
         endianess = ASSEMBLER.endianess
         return jsonify(arch_mode=arch_mode, endianess=endianess)
+    
+class AssemblyStoreFilterBytes(Resource):
+    """
+    REST calls for changing assembler arch settings.
+    """
+    def post(self):
+        """
+        Handle setting the architechture settings.
+        """
+        parser = reqparse.RequestParser()
+        parser.add_argument('filter_bytes', type=str, required=True,
+                            location='json')
+        
+        args = parser.parse_args()
+        ASSEMBLY_STORE.filter_bytes = binascii.unhexlify(args.filter_bytes)
+        
+        ASSEMBLY_STORE.ClearErrors()
+        
+        for row in ASSEMBLY_STORE.GetRowsIterator():
+            ASSEMBLER.CheckOpcodeBytes(row, ASSEMBLY_STORE)
+            
+        return jsonify(success="1")
+
+
+class SaveModal(Resource):
+    """
+    Save shellcode handler (this produces the modal html)
+    """
+    def GetShellcodeString(self):
+        """
+        Create a string that can be imported in python / ruby
+        """
+        sc_text = "shellcode = ("
+        for row in ASSEMBLY_STORE.GetRowsIterator():
+            if row.in_use:
+                sc_text += "%s # %s" % (repr(row.opcode).replace("\\\\", "\\"), 
+                                        row.mnemonic)
+                if row.comment:
+                    sc_text += "--  %s" % row.comment
+                sc_text += "\n"
+        sc_text += ")"
+        
+        return sc_text
+
+    def get(self):
+        return self.GetShellcodeString()
+    
+    

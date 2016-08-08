@@ -7,8 +7,9 @@
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/jquery-ui.css')}}">
     <script src="{{ url_for('static', filename='js/jquery-latest.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery-ui-1.10.4.min.js') }}"></script>
-
     <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
+    <script src="{{url_for('static', filename="js/save.js")}}"></script>
+    <script src="{{url_for('static', filename="js/filter.js")}}"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -27,6 +28,7 @@
         
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
+             <li><a id="save-btn" href="#">Save</a></li>
              <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">ARCH:<span id="arch-disp">x86</span><span class="caret"></span></a>
                     <ul class="dropdown-menu">
@@ -61,6 +63,38 @@
     <div class="alert alert-info alert-dismissable"><div class="panel panel-info">{{ message }}</div></div>
 {% endfor %}
 
+<div class="row">
+<div class="col-md-offset-1 col-md-10">
+<form class="form-inline">
+  <div class="form-group">
+    <label class="sr-only" for="exampleInputAmount"></label>
+    <div class="input-group">
+      <div class="input-group-btn"><button id="filter-btn" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-filter"></span>Filter</button></div>
+      <input id="filter-bytes" type="text" class="form-control" id="exampleInputAmount" placeholder="Bytes to filter">
+      </div>
+      </div>
+</form>
+</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="saveModal" tabindex="-1" role="dialog" aria-labelledby="saveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                 <h4 class="modal-title">Shellcode for scripts</h4>
+            </div>
+            <div class="modal-body"><textarea class="form-control" id="asm-str"></textarea></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
 
 <div class="container" id="main_container"> 
   <div class="row">
@@ -74,5 +108,12 @@
  </footer>
 
 </div><!-- container -->
+<script>
+$(document).ready(function () {
+   $( "#save-btn" ).bind( "click", save_shellcode);
+   $( "#filter-btn").bind( "click", filter_bytes);
+});
+
+</script>
 </body>
 </html>
