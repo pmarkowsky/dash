@@ -203,6 +203,12 @@ class AssemblyStoreFilterBytes(Resource):
             ASSEMBLER.CheckOpcodeBytes(row, ASSEMBLY_STORE)
             
         return jsonify(success="1")
+    
+    def get(self):
+        """
+        Get the current state 
+        """
+        return jsonify(filter_bytes=binascii.b2a_hex(ASSEMBLY_STORE.filter_bytes))
 
 
 class SaveModal(Resource):

@@ -238,6 +238,10 @@ function update_asm_rows() {
      $(".asm-endian-option").on("click", set_endianess);
      $(".asm-row").hover(update_current_row_id);
   });
+  
+  $.getJSON("/api/filter_bytes", function (data) {
+    $("#filter-bytes").val(data.filter_bytes);
+  });
 }
 
 $(document).ready(function () {
