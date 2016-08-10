@@ -10,6 +10,7 @@ import struct
 import capstone
 import keystone
 
+
 # constants
 LITTLE_ENDIAN = 0
 BIG_ENDIAN = 1
@@ -80,8 +81,7 @@ class Assembler(object):
                                                        keystone.KS_MODE_32|keystone.KS_MODE_LITTLE_ENDIAN),
                                                       (capstone.CS_ARCH_X86,
                                                        capstone.CS_MODE_32|capstone.CS_MODE_LITTLE_ENDIAN)),
-                            (X86_64, LITTLE_ENDIAN): ((keystone.KS_ARCH_X86, 
-                                                       keystone.KS_MODE_64|keystone.KS_MODE_LITTLE_ENDIAN),
+                            (X86_64, LITTLE_ENDIAN): ((keystone.KS_ARCH_X86, keystone.KS_MODE_64),
                                                       (capstone.CS_ARCH_X86,
                                                        capstone.CS_MODE_64|capstone.CS_MODE_LITTLE_ENDIAN)),
                             (ARM_16, BIG_ENDIAN): ((keystone.KS_ARCH_ARM, 
@@ -104,11 +104,11 @@ class Assembler(object):
                                                        keystone.KS_MODE_LITTLE_ENDIAN),
                                                       (capstone.CS_ARCH_ARM64, capstone.CS_MODE_LITTLE_ENDIAN)),
                             (MIPS_32, BIG_ENDIAN): ((keystone.KS_ARCH_MIPS, 
-                                                     keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN),
+                                                     keystone.KS_MODE_32|keystone.KS_MODE_BIG_ENDIAN|keystone.KS_MODE_MIPS32),
                                                     (capstone.CS_ARCH_MIPS,
                                                      capstone.CS_MODE_32|capstone.CS_MODE_BIG_ENDIAN)),
                             (MIPS_32, LITTLE_ENDIAN): ((keystone.KS_ARCH_MIPS, 
-                                                        keystone.KS_MODE_32|keystone.KS_MODE_LITTLE_ENDIAN),
+                                                        keystone.KS_MODE_32|keystone.KS_MODE_LITTLE_ENDIAN|keystone.KS_MODE_MIPS32),
                                                        (capstone.CS_ARCH_MIPS,
                                                         capstone.CS_MODE_32|capstone.CS_MODE_LITTLE_ENDIAN))
                             }
@@ -448,9 +448,55 @@ class Assembler(object):
 
         insts = self.disassembler.disasm(byte_buffer, starting_address)
         index = 0
-        for inst in insts:
-            store.CreateRowFromCapstoneInst(index, inst)
-            index += 1
+        byte_len = 0
+        
+        while byte_len < len(byte_buffer):
+            insts = self.disassembler.disasm(byte_buffer[byte_len:], starting_address)
+
+            for inst in insts:
+                store.CreateRowFromCapstoneInst(index, inst)
+                index += 1
+                byte_len += len(inst.bytes)
+                starting_address += len(inst.bytes)
+            
+            # if we hit instructions we can't decode
+            if byte_len < len(byte_buffer):
+                # try and consume the minimum instruction size worth of data as 
+                # a dq,dd or db
+                if self.arch_mode in (X86_16, X86_32, X86_64):
+                    store.InsertDBRowAt(starting_address, index, 
+                                        byte_buffer[byte_len:byte_len + 1])
+                    byte_len += 1
+                    starting_address += 1
+                elif self.arch_mode == ARM_16:
+                    # grab two bytes
+                    if (len(byte_buffer) - byte_len) >= 2:
+                        store.InsertDHRowAt(starting_address, index, 
+                                            byte_buffer[byte_len:byte_len + 2],
+                                            self.endianess)
+                        byte_len += 2
+                        starting_address += 2
+                    else:
+                        store.InsertDbRowAt(starting_address, index, 
+                                            byte_buffer[byte_len:byte_len+1])
+                        byte_len += 1
+                        starting_address += 1
+                elif self.arch_mode in (ARM_32, MIPS_32, ARM_64):
+                    # grab four bytes
+                    if len(byte_buffer) - byte_len >= 4:
+                        store.InsertDDRowAt(starting_address, index, 
+                                            byte_buffer[byte_len:byte_len + 4], 
+                                            self.endianess)
+                        byte_len += 4
+                        starting_address += 4
+                    else:
+                        # use db for the remainder
+                        new_len += store.InsertDbMultibyteRow(starting_address, index, 
+                                                              byte_buffer[byte_len:])
+                        byte_len += new_len
+                        starting_address += new_len
+                    
+                index += 1
 
 
     def Disassemble(self, index, store):

@@ -55,18 +55,29 @@ class TableRow(Resource):
         Insert multiple instructions at once using the mnemonic field.
         """
         #update current row
-        mnemonic_fields = mnemonics[0].split() 
+        mnemonic_fields = mnemonics[0].split()
         operation_str = mnemonic_fields[0].upper()
         current_row.SetMnemonic(operation_str + ' ' + ' '.join(mnemonic_fields[1:]))
         ASSEMBLY_STORE.UpdateRow(current_row.index, current_row)
 
         for i in xrange(1, len(mnemonics)):
             mnemonic_fields = mnemonics[i].split() 
+            # if we had accidental ; ; ignore it
+            if not mnemonic_fields:
+                continue
+            
             operation_str = mnemonic_fields[0].upper()
             mnemonic_str = operation_str + ' ' + ' '.join(mnemonic_fields[1:])
             row = RowData(0, "", 0, "", mnemonic_str, "", 
                           index=current_row.index + i, in_use=True)
-            ASSEMBLY_STORE.InsertRowAt(i, row)
+            ASSEMBLY_STORE.InsertRowAt(row.index, row)
+            
+    def delete(self, row_index):
+        """
+        Delete a row at a given index
+        """
+        ASSEMBLY_STORE.DeleteRow(row_index)
+        return jsonify(success=1)
 
     @marshal_with(TABLE_ROW_FIELDS)
     def put(self, row_index):
@@ -114,9 +125,14 @@ class TableRow(Resource):
             ASSEMBLER.Disassemble(row.index, ASSEMBLY_STORE)
         else:
 
-            if args.mnemonic != row.mnemonic:
-                new_mnemonics = args.mnemonic.split(';')
-                self.InsertMultipleRowsByMnemonic(row, new_mnemonics)
+            if args.mnemonic != row.mnemonic or args.mnemonic == '':
+                if args.mnemonic == '':
+                   # delete the row. 
+                    ASSEMBLY_STORE.DeleteRow(row_index)
+                    return row.ToDict()
+                else:
+                    new_mnemonics = args.mnemonic.split(';')
+                    self.InsertMultipleRowsByMnemonic(row, new_mnemonics)
             else:
                 ASSEMBLY_STORE.UpdateRow(row.index, row)
             ASSEMBLER.Assemble(ASSEMBLY_STORE)
@@ -181,6 +197,7 @@ class AssemblyStoreSettings(Resource):
         arch_mode = ASSEMBLER.arch_mode
         endianess = ASSEMBLER.endianess
         return jsonify(arch_mode=arch_mode, endianess=endianess)
+    
     
 class AssemblyStoreFilterBytes(Resource):
     """

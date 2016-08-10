@@ -6,6 +6,7 @@ Author: Pete Markowsky <peterm@vodun.org>
 """
 import binascii
 import cPickle
+import struct
 
 X86 = 'x86'
 X64 = 'x64'
@@ -263,6 +264,42 @@ class AssemblyStore(object):
         # it's target to address plus length of instructionBytes
         self.InsertRowAt(index, row)
         self.UpdateOffsetsAndAddresses()
+        
+    def InsertDBRowAt(self, address, index, byte):
+        mnemonic = "db 0x%02x" % ord(byte)
+        row = RowData(0, '', address, byte, mnemonic, '',
+                      index, in_use=True)
+        self.InsertRowAt(index, row)
+    
+    def InsertDBMultibyteRowAt(self, address, index, bytes_vals):
+        mnemonic = "db " + ", ".join(map(lambda x: "0x%02x" % ord(x), byte_vals))
+        row = RowData(0, '', address, chr(byte), mnemonic, '',
+                      index, in_use=True)
+        self.InsertRowAt(index, row)
+        return len(byte_vals)
+
+        
+    def InsertDHRowAt(self, address, index, byte_vals, big_endian=False):
+        if big_endian:
+            val = struct.unpack(">H")[0]
+        else:
+            val = struct.unpack("<H", byte_vals)[0]
+        mnemonic = "dh 0x%04x" % val
+        
+        row = RowData(0, '', address, byte_vals, mnemonic, '',
+                      index, in_use=True)
+        self.InsertRowAt(index, row)
+        
+    def InsertDDRowAt(self, address, index, byte_vals, big_endian=False):
+        if big_endian:
+            val = struct.unpack(">I")[0]
+        else:
+            val = struct.unpack("<I", byte_vals)[0]
+        mnemonic = "dd 0x%08x" % val
+        
+        row = RowData(0, '', address, byte_vals, mnemonic, '',
+                      index, in_use=True)
+        self.InsertRowAt(index, row)
 
     def InsertRowAt(self, index, row):
         """

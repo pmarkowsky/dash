@@ -8,6 +8,6 @@ function save_shellcode() {
       dataType: 'text',
       async:false
     });
-  $("#asm-str").text(asm_str);
+  $("#asm-str").val(asm_str);
   $("#saveModal").modal('show');
 }

@@ -10,6 +10,7 @@
     <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
     <script src="{{url_for('static', filename="js/save.js")}}"></script>
     <script src="{{url_for('static', filename="js/filter.js")}}"></script>
+    <script src="{{url_for('static', filename="js/delete.js")}}"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -69,10 +70,11 @@
   <div class="form-group">
     <label class="sr-only" for="exampleInputAmount"></label>
     <div class="input-group">
-      <div class="input-group-btn"><button id="filter-btn" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-filter"></span>Filter</button></div>
-      <input id="filter-bytes" type="text" class="form-control" id="exampleInputAmount" placeholder="Bytes to filter">
+      <div class="input-group-btn"><button id="filter-btn" type="button" class="btn btn-danger">Filter</button></div>
+        <input id="filter-bytes" type="text" class="form-control" id="exampleInputAmount" placeholder="Bytes to filter">
       </div>
-      </div>
+    </div>
+    </div>
 </form>
 </div>
 </div>
