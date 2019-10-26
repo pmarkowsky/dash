@@ -96,7 +96,7 @@ class RowData(object):
                 self.address = int(address, 16)
             else:
                 self.address = int(address)
-        except:
+        except ValueError:
             pass
 
     def DisplayAddress(self):
@@ -113,7 +113,7 @@ class RowData(object):
         try:
             self.opcode = binascii.unhexlify(hex_str.replace(' ', ''))
             self.in_use = True
-        except:
+        except TypeError:
             self.in_use = False
             self.opcode = hex_str
             self.mnemonic = '<INVALID OPCODE SUPPLIED>'
