@@ -4,7 +4,7 @@ rest_api.py: a REST API for updating and retrieving assembly information in the 
 import binascii
 
 #third-party modules
-from flask import jsonify, abort, render_template
+from flask import jsonify, abort
 from flask.ext.restful import Resource, reqparse, marshal_with, fields
 
 #app specific modules

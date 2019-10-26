@@ -212,7 +212,7 @@ class Assembler(object):
         byte_values = []
         for operand in mnemonic.split(","):
             value = self.HandleNumber(operand.strip(), 256)
-            if value == None:
+            if value is None:
                 return None, None
             else:
                 pack_string += "B"
@@ -314,10 +314,6 @@ class Assembler(object):
                     opcode_str = "".join(["%02x" % byte for byte in encoded_bytes])
                     row.opcode = binascii.unhexlify(opcode_str)
                     store.UpdateRow(row.index, row)
-                    # scan to make sure we updated all of the symbols addresses
-                    for row in store.GetRowsIterator():
-                        if row.label != '':
-                            labels[row.label] = row.address
 
                 except keystone.KsError as exc:
                     LOGGER.error(str(exc))
@@ -446,7 +442,6 @@ class Assembler(object):
         store.Reset()
         store.AddRows(20)
 
-        insts = self.disassembler.disasm(byte_buffer, starting_address)
         index = 0
         byte_len = 0
         
