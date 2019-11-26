@@ -97,7 +97,7 @@ class RowData(object):
             else:
                 self.address = int(address)
         except ValueError:
-            pass
+            pas
 
     def DisplayAddress(self):
         """
