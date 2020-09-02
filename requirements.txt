@@ -1,5 +1,6 @@
+pip == 20.2.2
 Flask == 1.0
 flask-restful == 0.2.12
 # These two libs need to be installed by hand.
-#capstone == 3.0.4
-#keystone == 0.9
+capstone == 3.0.4
+keystone-engine == 0.9.2

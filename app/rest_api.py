@@ -99,7 +99,7 @@ class TableRow(Resource):
         parser.add_argument('offset', type=int, default=row.offset, 
                             location='json')
         parser.add_argument('label', default=row.label, location='json')
-        parser.add_argument('address', type=str, default=row.address,
+        parser.add_argument('address', type=str, default=str(row.address),
                             location='json')
         parser.add_argument('opcode', default=row.opcode, location='json')
         parser.add_argument('mnemonic', default=row.mnemonic, location='json')
