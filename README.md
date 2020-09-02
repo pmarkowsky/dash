@@ -40,7 +40,7 @@ The opcodes column is directly editable as well. Here you need to enter in each 
 
 ## Changing Processor Modes
 
-You can change which processor mode dash works in, when this happens it will disassemble all of the bytes in the opcodes fields of each row in the new mode. This could be useful if you want to look at things like [polyglot shellcode](http://hyperpolyglot.org/unix-shells).
+You can change which processor mode dash works in, when this happens it will disassemble all of the bytes in the opcodes fields of each row in the new mode. This could be useful if you want to look at things like [polyglot shellcode](http://phrack.org/issues/57/14.html).
 
 Changing Dash's configuration is accomplish using the three dropdown menus in the upper right hand corner.
 
