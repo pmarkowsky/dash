@@ -1,5 +1,5 @@
 pip == 21.1
-Flask == 1.0
+Flask == 2.3.2
 flask-restful == 0.2.12
 # These two libs need to be installed by hand.
 capstone == 3.0.4
