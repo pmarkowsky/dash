@@ -1,4 +1,4 @@
-pip == 21.1
+pip == 23.3
 Flask == 2.3.2
 flask-restful == 0.2.12
 # These two libs need to be installed by hand.
